@@ -226,6 +226,126 @@ details {
   margin: 8px 0;
 }
 
+.ordem {
+  list-style: none;
+  padding: 0;
+}
+
+.ordem li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #8883;
+  border-left: 4px solid transparent;
+}
+
+.ordem li.turno {
+  border-left-color: #c77d00;
+  background: #c77d0018;
+}
+
+.ordem .nome {
+  flex: 1;
+  min-width: 140px;
+}
+
+.ordem .ini {
+  width: 52px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.form-npc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin: 8px 0;
+}
+
+.form-npc label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.form-npc input {
+  width: 90px;
+}
+
+.form-npc label:first-child input {
+  width: 160px;
+}
+
+.mapa-area {
+  height: 65vh;
+  min-height: 360px;
+  border: 1px solid #8886;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1b1d23;
+  touch-action: none;
+  cursor: grab;
+}
+
+.mapa-area.medindo {
+  cursor: crosshair;
+}
+
+.mapa-area svg {
+  display: block;
+  user-select: none;
+}
+
+button.ativo {
+  outline: 2px solid #ffd23f;
+}
+
+.selecionado {
+  align-items: center;
+  margin: 8px 0;
+}
+
+.painel-dados {
+  margin: 16px 0;
+}
+
+.historico {
+  list-style: none;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.historico li {
+  padding: 6px 8px;
+  border-bottom: 1px solid #8883;
+  border-left: 4px solid transparent;
+}
+
+.historico li.critico {
+  border-left-color: #2e9e5b;
+}
+
+.historico li.falha {
+  border-left-color: #d03b3b;
+}
+
+.total {
+  font-size: 1.2rem;
+}
+
+button.rolavel {
+  padding: 1px 8px;
+  font: inherit;
+}
+
+button.numero.rolavel {
+  padding: 6px 8px;
+}
+
 .ok {
   color: #2e9e5b;
 }

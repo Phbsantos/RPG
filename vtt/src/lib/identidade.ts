@@ -23,6 +23,9 @@ function gravar(chave: string, valor: string) {
   }
 }
 
+export const lerLocal = ler
+export const gravarLocal = gravar
+
 export function obterId(): string {
   let id = ler(CHAVE_ID)
   if (!id) {

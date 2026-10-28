@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { marcarComoMestre, obterNome, salvarNome } from '../lib/identidade'
 import { gerarCodigo, normalizarCodigo, TAMANHO_CODIGO } from '../lib/sala'
+import { criarChavesDeMestre } from '../lib/seguranca'
 
 type Props = { irParaSala: (codigo: string) => void }
 
@@ -11,9 +12,10 @@ export default function Inicio({ irParaSala }: Props) {
   const nomeValido = nome.trim().length > 0
   const codigoValido = codigo.length === TAMANHO_CODIGO
 
-  function criarSala() {
+  async function criarSala() {
     const novo = gerarCodigo()
     salvarNome(nome)
+    await criarChavesDeMestre(novo) // a chave do mestre é criada junto com a sala
     marcarComoMestre(novo)
     irParaSala(novo)
   }
@@ -35,7 +37,7 @@ export default function Inicio({ irParaSala }: Props) {
 
       <section className="bloco">
         <h2>Sou o mestre</h2>
-        <button disabled={!nomeValido} onClick={criarSala}>
+        <button disabled={!nomeValido} onClick={() => void criarSala()}>
           Criar sala
         </button>
       </section>

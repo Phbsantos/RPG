@@ -24,9 +24,14 @@ import {
   resumoClasses,
 } from './regras'
 
-type Props = { ficha: Ficha; aoMudar: (f: Ficha) => void }
+type Props = {
+  ficha: Ficha
+  aoMudar: (f: Ficha) => void
+  aoTestar: (rotulo: string, bonus: number) => void // teste de d20 (respeita vantagem/desvantagem)
+  aoRolarDano: (rotulo: string, formula: string) => void
+}
 
-export default function FichaVista({ ficha, aoMudar }: Props) {
+export default function FichaVista({ ficha, aoMudar, aoTestar, aoRolarDano }: Props) {
   const { combate } = ficha
   const [quantia, setQuantia] = useState(1)
   const [condicaoNova, setCondicaoNova] = useState('')
@@ -92,7 +97,11 @@ export default function FichaVista({ ficha, aoMudar }: Props) {
           <h3>Combate</h3>
           <div className="numeros">
             <Numero rotulo="CA" valor={combate.ca} />
-            <Numero rotulo="Iniciativa" valor={formatarBonus(iniciativa(ficha))} />
+            <Numero
+              rotulo="Iniciativa"
+              valor={formatarBonus(iniciativa(ficha))}
+              aoClicar={() => aoTestar('Iniciativa', iniciativa(ficha))}
+            />
             <Numero rotulo="Deslocamento" valor={`${combate.deslocamento} m`} />
             <Numero rotulo="Prof." valor={formatarBonus(bonusProficiencia(ficha))} />
             <Numero rotulo="Perc. passiva" valor={percepcaoPassiva(ficha)} />
@@ -212,10 +221,24 @@ export default function FichaVista({ ficha, aoMudar }: Props) {
                 <tr key={a}>
                   <td>{NOMES_ATRIBUTO[a]}</td>
                   <td>{ficha.atributos[a]}</td>
-                  <td>{formatarBonus(modificador(ficha.atributos[a]))}</td>
-                  <td title="Salvaguarda">
+                  <td>
+                    <button
+                      className="rolavel"
+                      title="Rolar teste de atributo"
+                      onClick={() => aoTestar(`${NOMES_ATRIBUTO[a]} (teste)`, modificador(ficha.atributos[a]))}
+                    >
+                      {formatarBonus(modificador(ficha.atributos[a]))}
+                    </button>
+                  </td>
+                  <td>
                     {ficha.proficiencias.salvaguardas.includes(a) ? '● ' : '○ '}
-                    {formatarBonus(bonusSalvaguarda(ficha, a))}
+                    <button
+                      className="rolavel"
+                      title="Rolar salvaguarda"
+                      onClick={() => aoTestar(`${NOMES_ATRIBUTO[a]} (salvaguarda)`, bonusSalvaguarda(ficha, a))}
+                    >
+                      {formatarBonus(bonusSalvaguarda(ficha, a))}
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -234,7 +257,15 @@ export default function FichaVista({ ficha, aoMudar }: Props) {
                     <td>{nivel === 'especialista' ? '◆' : nivel ? '●' : '○'}</td>
                     <td>{PERICIAS[id].nome}</td>
                     <td className="suave">{PERICIAS[id].atributo.toUpperCase()}</td>
-                    <td>{formatarBonus(bonusPericia(ficha, id))}</td>
+                    <td>
+                      <button
+                        className="rolavel"
+                        title="Rolar perícia"
+                        onClick={() => aoTestar(PERICIAS[id].nome, bonusPericia(ficha, id))}
+                      >
+                        {formatarBonus(bonusPericia(ficha, id))}
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
@@ -250,9 +281,15 @@ export default function FichaVista({ ficha, aoMudar }: Props) {
                 {ficha.ataques.map((a, i) => (
                   <tr key={i}>
                     <td>{a.nome}</td>
-                    <td>{formatarBonus(a.bonus)}</td>
                     <td>
-                      {a.dano}
+                      <button className="rolavel" title="Rolar ataque" onClick={() => aoTestar(`${a.nome} (ataque)`, a.bonus)}>
+                        {formatarBonus(a.bonus)}
+                      </button>
+                    </td>
+                    <td>
+                      <button className="rolavel" title="Rolar dano" onClick={() => aoRolarDano(`${a.nome} (dano)`, a.dano)}>
+                        {a.dano}
+                      </button>
                       {a.tipoDano && ` ${a.tipoDano}`}
                     </td>
                     <td className="suave">{a.notas}</td>
@@ -357,12 +394,19 @@ export default function FichaVista({ ficha, aoMudar }: Props) {
   )
 }
 
-function Numero({ rotulo, valor }: { rotulo: string; valor: string | number }) {
-  return (
-    <div className="numero">
+function Numero({ rotulo, valor, aoClicar }: { rotulo: string; valor: string | number; aoClicar?: () => void }) {
+  const conteudo = (
+    <>
       <strong>{valor}</strong>
       <span>{rotulo}</span>
-    </div>
+    </>
+  )
+  return aoClicar ? (
+    <button className="numero rolavel" title={`Rolar ${rotulo}`} onClick={aoClicar}>
+      {conteudo}
+    </button>
+  ) : (
+    <div className="numero">{conteudo}</div>
   )
 }
 
