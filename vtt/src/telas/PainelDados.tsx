@@ -17,12 +17,12 @@ export default function PainelDados({ rolagens, modo, aoMudarModo, ehMestre, err
   const [secreta, setSecreta] = useState(false)
 
   return (
-    <section className="cartao painel-dados">
-      <h3>Dados</h3>
+    <section className="dados">
+      <h3 className="painel-titulo">Dados</h3>
 
-      <div className="etiquetas">
+      <div className="dados-rapidos">
         {DADOS_RAPIDOS.map((l) => (
-          <button key={l} onClick={() => aoRolar(l === 20 ? formulaTeste(0, modo) : `1d${l}`, secreta && ehMestre)}>
+          <button key={l} className={l === 20 ? 'd20' : ''} onClick={() => aoRolar(l === 20 ? formulaTeste(0, modo) : `1d${l}`, secreta && ehMestre)}>
             d{l}
           </button>
         ))}
@@ -35,11 +35,11 @@ export default function PainelDados({ rolagens, modo, aoMudarModo, ehMestre, err
           aoRolar(formula, secreta && ehMestre)
         }}
       >
-        <input value={formula} onChange={(e) => setFormula(e.target.value)} placeholder="2d6+3" aria-label="Fórmula" />
+        <input style={{ flex: 1, minWidth: 0 }} value={formula} onChange={(e) => setFormula(e.target.value)} placeholder="2d6+3" aria-label="Fórmula" />
         <button type="submit">Rolar</button>
       </form>
 
-      <div className="acoes">
+      <div className="acoes" style={{ marginTop: 8 }}>
         <select value={modo} onChange={(e) => aoMudarModo(e.target.value as ModoD20)} aria-label="Modo do d20">
           <option value="normal">Normal</option>
           <option value="vantagem">Vantagem</option>
@@ -51,14 +51,14 @@ export default function PainelDados({ rolagens, modo, aoMudarModo, ehMestre, err
           </label>
         )}
       </div>
-      <p className="suave">Vantagem/desvantagem valem para o d20 e para testes da ficha. Também aceita 4d6kh3 (mantém os 3 maiores).</p>
 
       {erro && (
-        <p className="erro" role="alert">
+        <p className="erro" role="alert" style={{ marginTop: 6 }}>
           {erro}
         </p>
       )}
 
+      <h3 className="painel-titulo" style={{ marginTop: 14, marginBottom: 0 }}>Histórico</h3>
       <ul className="historico">
         {rolagens.map((r) => (
           <LinhaRolagem key={r.id} r={r} />

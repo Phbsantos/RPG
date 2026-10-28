@@ -15,6 +15,7 @@ import {
 import { rolar, totalDe } from '../lib/dados'
 import { CONDICOES } from '../ficha/esquema'
 import type { Participante } from '../lib/sala'
+import { corDeAvatar, corDoPv, iniciais } from '../lib/visual'
 import Bestiario from './Bestiario'
 
 type Props = {
@@ -35,6 +36,7 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
   const [quantia, setQuantia] = useState(1)
   const [condicao, setCondicao] = useState<string>(CONDICOES[0])
   const [npc, setNpc] = useState(NPC_INICIAL)
+  const [selecionado, setSelecionado] = useState<string | null>(null)
 
   const lista = ordenados(combate)
   const resumoDe = (c: Combatente) => participantes.find((p) => p.id === c.donoId)?.personagem
@@ -128,12 +130,12 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
 
       <div className="acoes">
         {!combate.ativo ? (
-          <button disabled={lista.every((c) => c.iniciativa === null)} onClick={() => aoMudar(iniciar)}>
+          <button className="pri" disabled={lista.every((c) => c.iniciativa === null)} onClick={() => aoMudar(iniciar)}>
             Iniciar combate
           </button>
         ) : (
           <>
-            <button onClick={() => aoMudar(proximoTurno)}>Próximo turno</button>
+            <button className="pri" onClick={() => aoMudar(proximoTurno)}>Próximo turno</button>
             <button onClick={() => window.confirm('Encerrar o combate?') && aoMudar(encerrar)}>Encerrar</button>
           </>
         )}
@@ -145,7 +147,97 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
           </button>
         )}
       </div>
-      {combate.ativo && vezDe && <p>Vez de: <strong>{vezDe.nome}</strong></p>}
+      {combate.ativo && vezDe && <p style={{ marginTop: 8 }}>Vez de: <strong>{vezDe.nome}</strong></p>}
+
+      <ul className="ordem">
+        {lista.map((c) => {
+          const resumo = resumoDe(c)
+          const condicoes = c.tipo === 'pc' ? (resumo?.condicoes ?? []) : c.condicoes
+          const fracao = c.tipo === 'pc' ? (resumo ? resumo.pv.atual / Math.max(1, resumo.pv.max) : 0) : c.pv.atual / c.pv.max
+          const aberto = selecionado === c.id
+          const podeAgir = c.tipo === 'npc' || Boolean(resumo)
+          return (
+            <li
+              key={c.id}
+              className={`${c.id === combate.turnoId ? 'turno' : ''} ${aberto ? 'sel' : ''}`}
+              onClick={() => setSelecionado(aberto ? null : c.id)}
+              style={c.oculto ? { opacity: 0.6 } : undefined}
+            >
+              <input
+                type="number"
+                className="ini-in"
+                aria-label={`Iniciativa de ${c.nome}`}
+                value={c.iniciativa ?? ''}
+                placeholder="–"
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) =>
+                  aoMudar((estado) => atualizar(estado, c.id, { iniciativa: e.target.value === '' ? null : Math.max(-20, Math.min(60, inteiro(e.target.value, 0))) }))
+                }
+              />
+              <span className="av" style={{ background: corDeAvatar(c.ordem) }}>{iniciais(c.nome)}</span>
+              <span className="info">
+                <b>
+                  {c.id === combate.turnoId && '▶ '}
+                  {c.nome} <span className="selo">{c.tipo === 'pc' ? 'PC' : 'NPC'}</span>
+                  {c.oculto && <span className="selo"> oculto</span>}
+                </b>
+                <small>
+                  {c.tipo === 'pc'
+                    ? resumo
+                      ? `PV ${resumo.pv.atual}/${resumo.pv.max} · CA ${resumo.ca}`
+                      : 'offline'
+                    : `PV ${c.pv.atual}/${c.pv.max}${c.pv.temp ? ` (+${c.pv.temp})` : ''} · CA ${c.ca} · ${estadoNpc(c.pv)}`}
+                </small>
+                <span className="barra"><i style={{ width: `${Math.max(0, Math.min(1, fracao)) * 100}%`, background: corDoPv(fracao) }} /></span>
+              </span>
+
+              {(aberto || condicoes.length > 0) && (
+                <div className="detalhe" onClick={(e) => e.stopPropagation()}>
+                  {condicoes.length > 0 && (
+                    <span className="etiquetas">
+                      {condicoes.map((x) => (
+                        <button key={x} className="etiqueta" title="Remover condição" onClick={() => mudarCondicao(c, x, false)}>
+                          {x} ✕
+                        </button>
+                      ))}
+                    </span>
+                  )}
+                  {aberto && (
+                    <span className="acoes">
+                      <button disabled={!podeAgir} onClick={() => aplicar(c, 'dano')}>Dano</button>
+                      <button disabled={!podeAgir} onClick={() => aplicar(c, 'cura')}>Cura</button>
+                      <button disabled={!podeAgir} onClick={() => mudarCondicao(c, condicao, true)}>+ Condição</button>
+                      {c.tipo === 'npc' && (
+                        <button onClick={() => aoMudar((estado) => atualizar(estado, c.id, { oculto: !c.oculto }))}>
+                          {c.oculto ? 'Revelar' : 'Ocultar'}
+                        </button>
+                      )}
+                      <button onClick={() => aoMudar((estado) => remover(estado, c.id))}>Remover</button>
+                    </span>
+                  )}
+                </div>
+              )}
+            </li>
+          )
+        })}
+        {lista.length === 0 && <li className="suave" style={{ cursor: 'default' }}>Nenhum combatente ainda.</li>}
+      </ul>
+
+      <div className="acoes">
+        <label>
+          Valor{' '}
+          <input type="number" min={1} className="curto" value={quantia} onChange={(e) => setQuantia(Math.max(1, inteiro(e.target.value, 1)))} />
+        </label>
+        <label>
+          Condição{' '}
+          <select value={condicao} onChange={(e) => setCondicao(e.target.value)}>
+            {CONDICOES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p className="suave" style={{ margin: '6px 0' }}>Clique num combatente para dano, cura e condições.</p>
 
       <details open={combate.combatentes.length === 0}>
         <summary>Adicionar monstros / NPCs</summary>
@@ -164,77 +256,7 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
         <Bestiario aoEscolher={(m) => setNpc({ nome: m.n, pv: m.pv, ca: m.ca, bonus: m.i, qtd: npc.qtd })} />
         <p className="suave">"Usar" preenche o formulário acima (nome, PV, CA e iniciativa); ajuste e clique em Adicionar.</p>
       </details>
-
-      <div className="acoes">
-        <label>
-          Valor{' '}
-          <input type="number" min={1} className="curto" value={quantia} onChange={(e) => setQuantia(Math.max(1, inteiro(e.target.value, 1)))} />
-        </label>
-        <label>
-          Condição{' '}
-          <select value={condicao} onChange={(e) => setCondicao(e.target.value)}>
-            {CONDICOES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <ol className="ordem">
-        {lista.map((c) => {
-          const resumo = resumoDe(c)
-          const condicoes = c.tipo === 'pc' ? (resumo?.condicoes ?? []) : c.condicoes
-          return (
-            <li key={c.id} className={c.id === combate.turnoId ? 'turno' : ''}>
-              <input
-                type="number"
-                className="curto ini"
-                aria-label={`Iniciativa de ${c.nome}`}
-                value={c.iniciativa ?? ''}
-                placeholder="–"
-                onChange={(e) =>
-                  aoMudar((estado) => atualizar(estado, c.id, { iniciativa: e.target.value === '' ? null : Math.max(-20, Math.min(60, inteiro(e.target.value, 0))) }))
-                }
-              />
-              <span className="nome">
-                {c.id === combate.turnoId && '▶ '}
-                {c.nome} <span className="selo">{c.tipo === 'pc' ? 'PC' : 'NPC'}</span>
-                {c.oculto && <span className="selo"> oculto</span>}
-              </span>
-              <span>
-                {c.tipo === 'pc'
-                  ? resumo
-                    ? `PV ${resumo.pv.atual}/${resumo.pv.max} · CA ${resumo.ca}`
-                    : 'offline'
-                  : `PV ${c.pv.atual}/${c.pv.max}${c.pv.temp ? ` (+${c.pv.temp})` : ''} · CA ${c.ca} · ${estadoNpc(c.pv)}`}
-              </span>
-              <span className="acoes">
-                <button disabled={c.tipo === 'pc' && !resumo} onClick={() => aplicar(c, 'dano')}>Dano</button>
-                <button disabled={c.tipo === 'pc' && !resumo} onClick={() => aplicar(c, 'cura')}>Cura</button>
-                <button disabled={c.tipo === 'pc' && !resumo} onClick={() => mudarCondicao(c, condicao, true)}>+ Condição</button>
-                {c.tipo === 'npc' && (
-                  <button onClick={() => aoMudar((estado) => atualizar(estado, c.id, { oculto: !c.oculto }))}>
-                    {c.oculto ? 'Revelar' : 'Ocultar'}
-                  </button>
-                )}
-                <button onClick={() => aoMudar((estado) => remover(estado, c.id))}>Remover</button>
-              </span>
-              {condicoes.length > 0 && (
-                <span className="etiquetas">
-                  {condicoes.map((x) => (
-                    <button key={x} className="etiqueta" title="Remover condição" onClick={() => mudarCondicao(c, x, false)}>
-                      {x} ✕
-                    </button>
-                  ))}
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ol>
-      <p className="suave">
-        Dano e cura em jogadores são enviados à ficha deles. Monstros ocultos e o PV exato dos NPCs nunca vão para os jogadores.
-      </p>
+      <p className="suave">Dano e cura em jogadores são enviados à ficha deles. Monstros ocultos e o PV exato dos NPCs nunca vão para os jogadores.</p>
     </section>
   )
 }

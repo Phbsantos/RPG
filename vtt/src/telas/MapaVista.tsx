@@ -142,7 +142,7 @@ export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, se
 
   return (
     <div className="mapa">
-      <div className="acoes">
+      <div className="mapa-ferr">
         <button onClick={ajustar}>Ajustar à tela</button>
         <button onClick={() => setCamera((c) => ({ ...c, zoom: Math.min(ZOOM_MAX, c.zoom * 1.25) }))}>+</button>
         <button onClick={() => setCamera((c) => ({ ...c, zoom: Math.max(ZOOM_MIN, c.zoom / 1.25) }))}>−</button>
@@ -228,7 +228,6 @@ export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, se
           </g>
         </svg>
       </div>
-      <p className="suave">Arraste o fundo para mover a vista, use a roda para dar zoom e arraste seus tokens para movê-los.</p>
     </div>
   )
 }

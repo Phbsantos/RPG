@@ -1,5 +1,6 @@
 import type { Publico } from '../lib/combate'
 import type { Participante } from '../lib/sala'
+import { corDeAvatar, corDoPv, iniciais } from '../lib/visual'
 
 type Props = {
   combate: Publico | null
@@ -24,33 +25,38 @@ export default function CombateVista({ combate, participantes, meuId, aoRolarIni
 
   return (
     <section className="cartao">
-      <h3>
-        Combate {combate.ativo ? `— Rodada ${combate.rodada}` : '(preparando)'}
-      </h3>
+      <h3>Combate {combate.ativo ? `— Rodada ${combate.rodada}` : '(preparando)'}</h3>
       {meuTurno && <p className="ok">É a sua vez!</p>}
-      {preciso && <button onClick={aoRolarIniciativa}>Rolar minha iniciativa</button>}
+      {preciso && <button className="pri" onClick={aoRolarIniciativa}>Rolar minha iniciativa</button>}
 
-      <ol className="ordem">
-        {combate.combatentes.map((c) => {
+      <ul className="ordem">
+        {combate.combatentes.map((c, i) => {
           const resumo = participantes.find((p) => p.id === c.donoId)?.personagem
           const condicoes = c.tipo === 'pc' ? (resumo?.condicoes ?? []) : c.condicoes
+          const fracao = resumo ? resumo.pv.atual / Math.max(1, resumo.pv.max) : null
           return (
-            <li key={c.id} className={c.id === combate.turnoId ? 'turno' : ''}>
+            <li key={c.id} className={c.id === combate.turnoId ? 'turno' : ''} style={{ cursor: 'default' }}>
               <span className="ini">{c.iniciativa ?? '–'}</span>
-              <span className="nome">
-                {c.id === combate.turnoId && '▶ '}
-                {c.nome}
-                {c.donoId === meuId && ' (você)'}
-              </span>
-              <span className="suave">
-                {c.tipo === 'pc'
-                  ? resumo
-                    ? `PV ${resumo.pv.atual}/${resumo.pv.max} · CA ${resumo.ca}`
-                    : 'offline'
-                  : c.estado}
+              <span className="av" style={{ background: corDeAvatar(i) }}>{iniciais(c.nome)}</span>
+              <span className="info">
+                <b>
+                  {c.id === combate.turnoId && '▶ '}
+                  {c.nome}
+                  {c.donoId === meuId && ' (você)'}
+                </b>
+                <small>
+                  {c.tipo === 'pc'
+                    ? resumo
+                      ? `PV ${resumo.pv.atual}/${resumo.pv.max} · CA ${resumo.ca}`
+                      : 'offline'
+                    : c.estado}
+                </small>
+                {fracao !== null && (
+                  <span className="barra"><i style={{ width: `${Math.max(0, Math.min(1, fracao)) * 100}%`, background: corDoPv(fracao) }} /></span>
+                )}
               </span>
               {condicoes.length > 0 && (
-                <span className="etiquetas">
+                <span className="etiquetas" style={{ flexBasis: '100%' }}>
                   {condicoes.map((x) => (
                     <span key={x} className="selo">
                       {x}
@@ -61,7 +67,7 @@ export default function CombateVista({ combate, participantes, meuId, aoRolarIni
             </li>
           )
         })}
-      </ol>
+      </ul>
     </section>
   )
 }
