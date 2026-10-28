@@ -30,14 +30,17 @@ export async function lerArquivoFicha(arquivo: File): Promise<ResultadoValidacao
   return validarFicha(dados)
 }
 
-export function baixarFicha(ficha: Ficha) {
-  const blob = new Blob([JSON.stringify(ficha, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
+export function baixarJson(nomeArquivo: string, conteudo: string) {
+  const url = URL.createObjectURL(new Blob([conteudo], { type: 'application/json' }))
   const a = document.createElement('a')
   a.href = url
-  a.download = `${ficha.nome.replace(/[^\p{L}\p{N}]+/gu, '-')}-${ficha.edicao}.json`
+  a.download = nomeArquivo
   a.click()
   URL.revokeObjectURL(url)
+}
+
+export function baixarFicha(ficha: Ficha) {
+  baixarJson(`${ficha.nome.replace(/[^\p{L}\p{N}]+/gu, '-')}-${ficha.edicao}.json`, JSON.stringify(ficha, null, 2))
 }
 
 // Cópia local para não perder a ficha ao recarregar a página.

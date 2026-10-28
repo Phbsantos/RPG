@@ -54,7 +54,6 @@
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
@@ -74,19 +73,19 @@ h2 {
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
+  font-size: 36px;
+  letter-spacing: -1px;
+  margin: 24px 0 12px;
   @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+    font-size: 28px;
+    margin: 16px 0 8px;
   }
 }
 h2 {
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
-  margin: 0 0 8px;
+  margin: 28px 0 10px;
   @media (max-width: 1024px) {
     font-size: 20px;
   }

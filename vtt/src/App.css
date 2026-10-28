@@ -312,6 +312,106 @@ button.ativo {
   margin: 16px 0;
 }
 
+/* ---- Polimento: controles e cartões consistentes em tema claro e escuro ---- */
+button,
+select,
+input,
+textarea {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text-h);
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+button:disabled {
+  opacity: 0.45;
+}
+
+input,
+select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+input[type='checkbox'],
+input[type='color'] {
+  padding: 0;
+}
+
+.cartao {
+  margin: 16px 0;
+  background: var(--code-bg);
+}
+
+.cartao h3 {
+  margin: 0 0 10px;
+  color: var(--text-h);
+}
+
+.lista-monstros {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.lista-monstros li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lista-monstros .nome {
+  flex: 1;
+  min-width: 180px;
+}
+
+.creditos {
+  font-size: 0.75rem;
+  margin-top: 8px;
+}
+
+summary {
+  cursor: pointer;
+  margin: 6px 0;
+  color: var(--text-h);
+}
+
+@media (max-width: 640px) {
+  .inicio,
+  .sala {
+    margin: 12px auto;
+    padding: 0 10px;
+  }
+
+  .ordem .nome {
+    min-width: 100%;
+  }
+
+  .mapa-area {
+    height: 55vh;
+  }
+}
+
 .historico {
   list-style: none;
   padding: 0;

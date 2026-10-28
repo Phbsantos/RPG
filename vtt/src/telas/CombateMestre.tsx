@@ -15,6 +15,7 @@ import {
 import { rolar, totalDe } from '../lib/dados'
 import { CONDICOES } from '../ficha/esquema'
 import type { Participante } from '../lib/sala'
+import Bestiario from './Bestiario'
 
 type Props = {
   combate: Combate
@@ -156,6 +157,12 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
           <label>Quantidade<input type="number" min={1} max={20} value={npc.qtd} onChange={(e) => setNpc({ ...npc, qtd: inteiro(e.target.value, 1) })} /></label>
           <button disabled={!npc.nome.trim()} onClick={adicionarNpcs}>Adicionar</button>
         </div>
+      </details>
+
+      <details>
+        <summary>Bestiário (SRD)</summary>
+        <Bestiario aoEscolher={(m) => setNpc({ nome: m.n, pv: m.pv, ca: m.ca, bonus: m.i, qtd: npc.qtd })} />
+        <p className="suave">"Usar" preenche o formulário acima (nome, PV, CA e iniciativa); ajuste e clique em Adicionar.</p>
       </details>
 
       <div className="acoes">

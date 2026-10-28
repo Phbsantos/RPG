@@ -13,6 +13,7 @@ import PainelDados from './PainelDados'
 import CombateMestre from './CombateMestre'
 import CombateVista from './CombateVista'
 import PainelMapa from './PainelMapa'
+import Campanha from './Campanha'
 import { useMapaMestre } from '../lib/mapaMestre'
 import { alinharNaGrade, limitar, novoMapa } from '../lib/mapa'
 
@@ -253,6 +254,18 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
         aoMudar={setMapa}
         aoMover={moverToken}
       />
+
+      {ehMestre && (
+        <Campanha
+          codigo={codigo}
+          combate={combate}
+          mapa={mapaMestre}
+          aoImportar={(c, m) => {
+            setCombate(() => c)
+            setMapa(() => m)
+          }}
+        />
+      )}
 
       <h2>Minha ficha</h2>
       <div className="acoes">
