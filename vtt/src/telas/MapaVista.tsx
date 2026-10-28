@@ -49,6 +49,23 @@ export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, se
     if (acaoRef.current?.tipo !== 'token') setPrevia(null)
   }, [mapa])
 
+  // Quando a área muda de tamanho (ex.: painel lateral recolhido), mantém o centro da vista no lugar.
+  useEffect(() => {
+    const el = recipienteRef.current
+    if (!el) return
+    let largura = el.clientWidth
+    let altura = el.clientHeight
+    const observador = new ResizeObserver(() => {
+      const dx = (el.clientWidth - largura) / 2
+      const dy = (el.clientHeight - altura) / 2
+      largura = el.clientWidth
+      altura = el.clientHeight
+      if (dx !== 0 || dy !== 0) setCamera((c) => ({ ...c, x: c.x + dx, y: c.y + dy }))
+    })
+    observador.observe(el)
+    return () => observador.disconnect()
+  }, [])
+
   // Zoom com a roda, mantendo fixo o ponto sob o cursor. Precisa de listener não passivo.
   useEffect(() => {
     const el = recipienteRef.current

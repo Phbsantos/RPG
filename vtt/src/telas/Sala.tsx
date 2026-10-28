@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { obterId, obterNome, papelNaSala, salvarNome } from '../lib/identidade'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { gravarLocal, lerLocal, obterId, obterNome, papelNaSala, salvarNome } from '../lib/identidade'
 import { useSala, type ResumoPersonagem } from '../lib/sala'
 import { chavePublicaDaSala } from '../lib/seguranca'
 import { formulaTeste, rolar, totalDe, type ModoD20 } from '../lib/dados'
@@ -27,6 +27,17 @@ type Props = { codigo: string; sair: () => void }
 type Aba = 'combate' | 'grupo' | 'mapa' | 'campanha'
 
 const MAPA_VAZIO = novoMapa() // identidade estável: o mapa só "muda" quando chega um novo de verdade
+
+// Quais painéis laterais estão abertos; lembrado entre visitas.
+const CHAVE_PAINEIS = 'vtt:paineis'
+function carregarPaineis(): { esq: boolean; dir: boolean } {
+  try {
+    const p = JSON.parse(lerLocal(CHAVE_PAINEIS) ?? '')
+    return { esq: p.esq !== false, dir: p.dir !== false }
+  } catch {
+    return { esq: true, dir: true }
+  }
+}
 
 function resumir(f: Ficha): ResumoPersonagem {
   return {
@@ -93,6 +104,20 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
   const [aba, setAba] = useState<Aba>('combate')
   const [selecionado, setSelecionado] = useState<string | null>(null)
   const [fichaAberta, setFichaAberta] = useState(false)
+  const [paineis, setPaineis] = useState(carregarPaineis)
+
+  useEffect(() => {
+    gravarLocal(CHAVE_PAINEIS, JSON.stringify(paineis))
+  }, [paineis])
+
+  // Clicar na aba ativa recolhe o painel; clicar em outra aba abre (se estiver recolhido) e troca.
+  function escolherAba(id: Aba) {
+    if (id === aba && paineis.esq) setPaineis({ ...paineis, esq: false })
+    else {
+      setAba(id)
+      setPaineis({ ...paineis, esq: true })
+    }
+  }
 
   // O mestre pediu para alterar a minha ficha (dano, cura, condição).
   function aoComando(c: Comando) {
@@ -223,7 +248,7 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
   const abas = ABAS.filter((a) => !a.soMestre || ehMestre)
 
   return (
-    <div className="shell">
+    <div className="shell" style={{ '--larg-esq': paineis.esq ? '340px' : '0px', '--larg-dir': paineis.dir ? '320px' : '0px' } as CSSProperties}>
       <header className="topo">
         <div className="logo">
           ⚔ Mesa Virtual <b>D&amp;D</b>
@@ -252,18 +277,18 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
           <button
             key={a.id}
             role="tab"
-            aria-selected={aba === a.id}
+            aria-selected={aba === a.id && paineis.esq}
             aria-label={a.titulo}
-            title={a.titulo}
-            className={aba === a.id ? 'on' : ''}
-            onClick={() => setAba(a.id)}
+            title={aba === a.id && paineis.esq ? `${a.titulo} (clique para recolher)` : a.titulo}
+            className={aba === a.id && paineis.esq ? 'on' : ''}
+            onClick={() => escolherAba(a.id)}
           >
             {a.icone}
           </button>
         ))}
       </nav>
 
-      <aside className="esq">
+      <aside className={`esq ${paineis.esq ? '' : 'fechado'}`} aria-hidden={!paineis.esq}>
         {aba === 'combate' &&
           (ehMestre ? (
             <CombateMestre combate={combate} aoMudar={setCombate} participantes={participantes} enviarMestre={enviarMestre} />
@@ -294,6 +319,25 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
       </aside>
 
       <main className="palco">
+        <button
+          className="alca alca-esq"
+          aria-label={paineis.esq ? 'Recolher painel esquerdo' : 'Expandir painel esquerdo'}
+          aria-expanded={paineis.esq}
+          title={paineis.esq ? 'Recolher painel' : 'Expandir painel'}
+          onClick={() => setPaineis({ ...paineis, esq: !paineis.esq })}
+        >
+          {paineis.esq ? '‹' : '›'}
+        </button>
+        <button
+          className="alca alca-dir"
+          aria-label={paineis.dir ? 'Recolher painel direito' : 'Expandir painel direito'}
+          aria-expanded={paineis.dir}
+          title={paineis.dir ? 'Recolher painel' : 'Expandir painel'}
+          onClick={() => setPaineis({ ...paineis, dir: !paineis.dir })}
+        >
+          {paineis.dir ? '›' : '‹'}
+        </button>
+
         <MapaVista
           mapa={mapa}
           ehMestre={ehMestre}
@@ -323,7 +367,7 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
         )}
       </main>
 
-      <aside className="dir">
+      <aside className={`dir ${paineis.dir ? '' : 'fechado'}`} aria-hidden={!paineis.dir}>
         <PainelDados
           rolagens={rolagens}
           modo={modo}

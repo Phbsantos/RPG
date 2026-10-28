@@ -146,11 +146,49 @@ summary {
 /* ============ Estrutura da mesa ============ */
 .shell {
   display: grid;
-  grid-template-columns: 60px 340px minmax(0, 1fr) 320px;
+  grid-template-columns: 60px var(--larg-esq, 340px) minmax(0, 1fr) var(--larg-dir, 320px);
   grid-template-rows: 52px minmax(0, 1fr);
   height: 100svh;
-  min-width: 1100px; /* layout de computador; celular fica para depois */
+  min-width: 700px; /* layout de computador; celular fica para depois */
   background: var(--bg);
+  transition: grid-template-columns 0.18s ease;
+}
+
+/* Painéis laterais recolhidos: largura zero, sem foco e sem borda. */
+.esq.fechado,
+.dir.fechado {
+  visibility: hidden;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+}
+
+/* Alças na borda do mapa para recolher/expandir os painéis. */
+.alca {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 7;
+  width: 20px;
+  height: 64px;
+  padding: 0;
+  font-size: 1.3rem;
+  line-height: 1;
+  background: rgba(21, 26, 35, 0.92);
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.alca-esq {
+  left: 0;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+}
+
+.alca-dir {
+  right: 0;
+  border-right: none;
+  border-radius: 10px 0 0 10px;
 }
 
 .topo {
