@@ -10,6 +10,8 @@ type Props = {
   aoBaixar: () => void
   aoRemover: () => void
   aoArquivo: (arquivo: File | undefined) => void
+  aoEditar: () => void
+  aoCriar: () => void
 }
 
 const NOME_CURTO: Record<Atributo, string> = {
@@ -22,7 +24,7 @@ const NOME_CURTO: Record<Atributo, string> = {
 }
 
 // Bloco da coluna direita: atributos, salvaguardas e perícias. Clicar em qualquer número rola o teste.
-export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, aoRemover, aoArquivo }: Props) {
+export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, aoRemover, aoArquivo, aoEditar, aoCriar }: Props) {
   const [todas, setTodas] = useState(false)
   const entrada = useRef<HTMLInputElement>(null)
 
@@ -49,6 +51,9 @@ export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, 
         <h4>Minha ficha</h4>
         <p className="suave" style={{ marginBottom: 8 }}>Carregue o JSON do seu personagem para rolar testes e acompanhar PV e recursos.</p>
         <input ref={entrada} type="file" accept=".json,application/json" onChange={(e) => escolher(e.target.files?.[0])} aria-label="Carregar ficha" style={{ width: '100%' }} />
+        <div className="acoes" style={{ marginTop: 8 }}>
+          <button className="pri" onClick={aoCriar}>Criar ficha</button>
+        </div>
         <p className="suave" style={{ marginTop: 8, fontSize: '0.8rem' }}>
           Sem ficha? Baixe um exemplo:{' '}
           <a href="exemplos/elowen-2014.json" download>Elowen (2014)</a> ·{' '}
@@ -118,6 +123,7 @@ export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, 
 
       <div className="acoes" style={{ marginTop: 10 }}>
         <button className="pri" onClick={aoAbrir}>Ficha completa</button>
+        <button onClick={aoEditar}>Editar ficha</button>
         <button onClick={aoBaixar}>Baixar JSON</button>
         <button onClick={aoRemover}>Remover</button>
       </div>

@@ -3,11 +3,11 @@ import { marcarComoMestre, obterNome, salasDoMestre, salvarNome } from '../lib/i
 import { gerarCodigo, normalizarCodigo, TAMANHO_CODIGO } from '../lib/sala'
 import { criarChavesDeMestre } from '../lib/seguranca'
 
-type Props = { irParaSala: (codigo: string) => void }
+type Props = { irParaSala: (codigo: string) => void; irParaEditor: () => void }
 
 const RECURSOS = ['⚔️ Combate e iniciativa', '🗺️ Mapa com tokens', '🎲 Dados compartilhados', '📜 Fichas em JSON', '📖 Bestiário do SRD']
 
-export default function Inicio({ irParaSala }: Props) {
+export default function Inicio({ irParaSala, irParaEditor }: Props) {
   const [nome, setNome] = useState(obterNome())
   const [codigo, setCodigo] = useState('')
   const [erro, setErro] = useState('')
@@ -121,6 +121,18 @@ export default function Inicio({ irParaSala }: Props) {
             </button>
           </form>
         </div>
+
+        <section className="atalho-ficha">
+          <span>Ainda sem ficha?</span>
+          <button
+            onClick={() => {
+              if (nomeValido) salvarNome(nome) // o nome não se perde ao ir e voltar do editor
+              irParaEditor()
+            }}
+          >
+            📝 Criar ou editar um personagem
+          </button>
+        </section>
 
         {!nomeValido && <p className="aviso dica">Digite o seu nome para liberar os botões.</p>}
         {erro && <p className="erro dica" role="alert">{erro}</p>}

@@ -5,6 +5,7 @@ import { papelNaSala } from './lib/identidade'
 import { fixarChave } from './lib/seguranca'
 import Inicio from './telas/Inicio'
 import Sala from './telas/Sala'
+import PaginaPersonagem from './telas/PaginaPersonagem'
 import './App.css'
 
 // Rota por hash (#/sala/ABC123): funciona na Vercel sem configurar reescrita de URL.
@@ -17,14 +18,23 @@ function codigoDaUrl(): string | null {
   return codigo
 }
 
+const naPaginaDoPersonagem = () => location.hash.startsWith('#/personagem')
+
 export default function App() {
   const [codigo, setCodigo] = useState<string | null>(codigoDaUrl)
+  const [personagem, setPersonagem] = useState(naPaginaDoPersonagem)
 
   useEffect(() => {
-    const aoMudar = () => setCodigo(codigoDaUrl())
+    const aoMudar = () => {
+      setCodigo(codigoDaUrl())
+      setPersonagem(naPaginaDoPersonagem())
+    }
     window.addEventListener('hashchange', aoMudar)
     return () => window.removeEventListener('hashchange', aoMudar)
   }, [])
+
+  // O editor de ficha funciona sem servidor, então abre mesmo sem o Supabase configurado.
+  if (personagem) return <PaginaPersonagem voltar={() => (location.hash = '')} />
 
   if (!supabaseConfigurado) {
     return (
@@ -40,5 +50,5 @@ export default function App() {
   if (codigo) {
     return <Sala key={codigo} codigo={codigo} sair={() => (location.hash = '')} />
   }
-  return <Inicio irParaSala={(c) => (location.hash = `#/sala/${c}`)} />
+  return <Inicio irParaSala={(c) => (location.hash = `#/sala/${c}`)} irParaEditor={() => (location.hash = '#/personagem')} />
 }

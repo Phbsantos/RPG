@@ -22,6 +22,8 @@ import BarraToken from './BarraToken'
 import Campanha from './Campanha'
 import Grupo from './Grupo'
 import Modal from './Modal'
+import EditorFicha from '../ficha/EditorFicha'
+import { fichaNova } from '../ficha/novaFicha'
 
 type Props = { codigo: string; sair: () => void }
 type Aba = 'combate' | 'grupo' | 'mapa' | 'campanha'
@@ -104,6 +106,8 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
   const [aba, setAba] = useState<Aba>('combate')
   const [selecionado, setSelecionado] = useState<string | null>(null)
   const [fichaAberta, setFichaAberta] = useState(false)
+  const [editor, setEditor] = useState<'novo' | 'editar' | null>(null)
+  const [editorSujo, setEditorSujo] = useState(false)
   const [paineis, setPaineis] = useState(carregarPaineis)
 
   useEffect(() => {
@@ -236,6 +240,17 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
   }
 
   const fecharFicha = useCallback(() => setFichaAberta(false), [])
+
+  function abrirEditor(modo: 'novo' | 'editar') {
+    setEditorSujo(false)
+    setEditor(modo)
+  }
+
+  // Esc ou clique fora não descartam alterações sem avisar.
+  const fecharEditor = useCallback(() => {
+    if (editorSujo && !window.confirm('Descartar as alterações da ficha?')) return
+    setEditor(null)
+  }, [editorSujo])
 
   // Quem está com a vez, para o aviso sobre o mapa.
   const turnoId = ehMestre ? combate.turnoId : (combatePublico?.turnoId ?? null)
@@ -384,8 +399,26 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
           aoBaixar={() => ficha && baixarFicha(ficha)}
           aoRemover={removerFicha}
           aoArquivo={(f) => void aoEscolherArquivo(f)}
+          aoEditar={() => abrirEditor('editar')}
+          aoCriar={() => abrirEditor('novo')}
         />
       </aside>
+
+      {editor && (
+        <Modal aoFechar={fecharEditor} largo ocultarFechar>
+          <EditorFicha
+            inicial={editor === 'editar' && ficha ? ficha : fichaNova()}
+            titulo={editor === 'editar' ? 'Editar ficha' : 'Criar ficha'}
+            aoMudar={() => setEditorSujo(true)}
+            aoCancelar={fecharEditor}
+            aoSalvar={(nova) => {
+              mudarFicha(nova)
+              setErros([])
+              setEditor(null)
+            }}
+          />
+        </Modal>
+      )}
 
       {fichaAberta && ficha && (
         <Modal aoFechar={fecharFicha}>
