@@ -1091,6 +1091,46 @@ textarea {
   user-select: none;
 }
 
+/* Dano num token de jogador: tremor, clarão vermelho e o valor subindo. */
+.token-golpe {
+  animation: token-tremor 0.45s ease-out;
+}
+
+.token-clarao {
+  opacity: 0;
+  animation: token-clarao 0.7s ease-out;
+}
+
+.token-dano {
+  opacity: 0;
+  animation: token-dano 1.3s ease-out;
+}
+
+@keyframes token-tremor {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(calc(var(--tremor) * -1), calc(var(--tremor) * 0.4)); }
+  30% { transform: translate(var(--tremor), calc(var(--tremor) * -0.4)); }
+  45% { transform: translate(calc(var(--tremor) * -0.7), 0); }
+  60% { transform: translate(calc(var(--tremor) * 0.7), 0); }
+  80% { transform: translate(calc(var(--tremor) * -0.3), 0); }
+}
+
+@keyframes token-clarao {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+@keyframes token-dano {
+  0% { opacity: 0; transform: translateY(0); }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(var(--subida)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .token-golpe { animation: none; }
+}
+
 .barra-token {
   display: flex;
   gap: 6px;
@@ -1182,6 +1222,22 @@ button.rolavel {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+}
+
+.bloco-titulo {
+  all: unset;
+  cursor: pointer;
+}
+
+.bloco-titulo:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 2px;
+}
+
+.bloco-ficha.recolhido h4 {
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .bloco-ficha h4 small {

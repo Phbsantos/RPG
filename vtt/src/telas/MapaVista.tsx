@@ -6,6 +6,7 @@ type Props = {
   ehMestre: boolean
   meuId: string
   turnoCombatenteId: string | null
+  pvPorDono: Record<string, number> // PV atual de cada jogador: quando cai, o token dele treme
   selecionado: string | null
   aoSelecionar: (id: string | null) => void
   aoMover: (id: string, x: number, y: number) => void
@@ -22,8 +23,23 @@ type Acao =
 const ZOOM_MIN = 0.1
 const ZOOM_MAX = 8
 
-export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, selecionado, aoSelecionar, aoMover }: Props) {
+export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, pvPorDono, selecionado, aoSelecionar, aoMover }: Props) {
   const recipienteRef = useRef<HTMLDivElement>(null)
+  // n muda a cada golpe e serve de key para reiniciar a animação, mesmo em dois golpes seguidos.
+  const [golpes, setGolpes] = useState<Record<string, { n: number; dano: number }>>({})
+  const [pvVisto, setPvVisto] = useState(pvPorDono)
+  const chavePv = JSON.stringify(pvPorDono)
+  const [chaveVista, setChaveVista] = useState(chavePv)
+  if (chavePv !== chaveVista) {
+    // Ajuste de estado durante a renderização (padrão do React para reagir a mudança de prop).
+    const novos: Record<string, { n: number; dano: number }> = {}
+    for (const [id, pv] of Object.entries(pvPorDono)) {
+      if (id in pvVisto && pv < pvVisto[id]) novos[id] = { n: (golpes[id]?.n ?? 0) + 1, dano: pvVisto[id] - pv }
+    }
+    setChaveVista(chavePv)
+    setPvVisto(pvPorDono)
+    if (Object.keys(novos).length) setGolpes({ ...golpes, ...novos })
+  }
   const acaoRef = useRef<Acao | null>(null)
   const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, zoom: 1 })
   const [previa, setPrevia] = useState<{ id: string; x: number; y: number } | null>(null)
@@ -199,6 +215,7 @@ export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, se
               const posicao = previa?.id === t.id ? previa : t
               const raio = (t.tamanho * g.tamanho) / 2 - 3
               const doTurno = turnoCombatenteId !== null && t.combatenteId === turnoCombatenteId
+              const golpe = t.donoId ? golpes[t.donoId] : undefined
               return (
                 <g
                   key={t.id}
@@ -207,16 +224,36 @@ export default function MapaVista({ mapa, ehMestre, meuId, turnoCombatenteId, se
                   style={{ cursor: pode(t) ? 'grab' : 'pointer' }}
                   opacity={t.oculto ? 0.5 : 1}
                 >
-                  <circle
-                    r={raio}
-                    fill={t.cor}
-                    stroke={doTurno ? '#ffd23f' : selecionado === t.id ? '#fff' : '#000'}
-                    strokeWidth={doTurno ? 6 : selecionado === t.id ? 4 : 2}
-                    strokeDasharray={t.oculto ? '8 6' : undefined}
-                  />
-                  <text textAnchor="middle" dominantBaseline="central" fontSize={raio * 0.9} fill="#fff" stroke="#000" strokeWidth={raio * 0.05} paintOrder="stroke" pointerEvents="none">
-                    {t.nome.slice(0, 2).toUpperCase()}
-                  </text>
+                  <g key={golpe?.n ?? 0} className={golpe ? 'token-golpe' : undefined} style={{ ['--tremor' as string]: `${g.tamanho * 0.07}px` }}>
+                    <circle
+                      r={raio}
+                      fill={t.cor}
+                      stroke={doTurno ? '#ffd23f' : selecionado === t.id ? '#fff' : '#000'}
+                      strokeWidth={doTurno ? 6 : selecionado === t.id ? 4 : 2}
+                      strokeDasharray={t.oculto ? '8 6' : undefined}
+                    />
+                    {golpe && <circle className="token-clarao" r={raio} fill="#e5252a" pointerEvents="none" />}
+                    <text textAnchor="middle" dominantBaseline="central" fontSize={raio * 0.9} fill="#fff" stroke="#000" strokeWidth={raio * 0.05} paintOrder="stroke" pointerEvents="none">
+                      {t.nome.slice(0, 2).toUpperCase()}
+                    </text>
+                    {golpe && (
+                      <text
+                        className="token-dano"
+                        y={-raio}
+                        textAnchor="middle"
+                        fontSize={g.tamanho * 0.42}
+                        fontWeight="bold"
+                        fill="#ff5a5f"
+                        stroke="#000"
+                        strokeWidth={g.tamanho * 0.07}
+                        paintOrder="stroke"
+                        pointerEvents="none"
+                        style={{ ['--subida' as string]: `${-g.tamanho * 0.7}px` }}
+                      >
+                        −{golpe.dano}
+                      </text>
+                    )}
+                  </g>
                   <text y={raio + g.tamanho * 0.28} textAnchor="middle" fontSize={g.tamanho * 0.24} fill="#fff" stroke="#000" strokeWidth={g.tamanho * 0.05} paintOrder="stroke" pointerEvents="none">
                     {t.nome}
                   </text>

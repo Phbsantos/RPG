@@ -23,9 +23,26 @@ const NOME_CURTO: Record<Atributo, string> = {
   car: 'CARISMA',
 }
 
+const CHAVE_ABERTO = 'vtt:bloco-ficha-aberto'
+
 // Bloco da coluna direita: atributos, salvaguardas e perícias. Clicar em qualquer número rola o teste.
 export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, aoRemover, aoArquivo, aoEditar, aoCriar }: Props) {
   const [todas, setTodas] = useState(false)
+  const [aberto, setAberto] = useState(() => {
+    try {
+      return localStorage.getItem(CHAVE_ABERTO) !== '0'
+    } catch {
+      return true
+    }
+  })
+  const alternar = () => {
+    setAberto(!aberto)
+    try {
+      localStorage.setItem(CHAVE_ABERTO, aberto ? '0' : '1')
+    } catch {
+      /* sem armazenamento: só não lembra */
+    }
+  }
   const entrada = useRef<HTMLInputElement>(null)
 
   const escolher = (arquivo: File | undefined) => {
@@ -68,11 +85,16 @@ export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, 
   const visiveis = todas ? ids : ids.filter((id) => ficha.proficiencias.pericias[id])
 
   return (
-    <section className="bloco-ficha">
+    <section className={`bloco-ficha ${aberto ? '' : 'recolhido'}`}>
       <h4>
-        Ficha de {ficha.nome.split(' ')[0]} <small>clique para rolar</small>
+        <button className="bloco-titulo" aria-expanded={aberto} onClick={alternar}>
+          <span aria-hidden="true">{aberto ? '▾' : '▸'}</span> Ficha de {ficha.nome.split(' ')[0]}
+        </button>
+        <small>{aberto ? 'clique para rolar' : `PV ${ficha.combate.pv.atual}/${ficha.combate.pv.max}`}</small>
       </h4>
 
+      {aberto && (
+      <>
       <div className="atributos">
         {ATRIBUTOS.map((a) => (
           <button
@@ -127,6 +149,8 @@ export default function BlocoFicha({ ficha, erros, aoTestar, aoAbrir, aoBaixar, 
         <button onClick={aoBaixar}>Baixar JSON</button>
         <button onClick={aoRemover}>Remover</button>
       </div>
+      </>
+      )}
       {mensagemErros}
     </section>
   )

@@ -358,6 +358,7 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
           ehMestre={ehMestre}
           meuId={meuId}
           turnoCombatenteId={turnoId}
+          pvPorDono={Object.fromEntries(participantes.filter((p) => p.personagem).map((p) => [p.id, p.personagem!.pv.atual]))}
           selecionado={selecionado}
           aoSelecionar={setSelecionado}
           aoMover={moverToken}
