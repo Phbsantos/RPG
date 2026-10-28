@@ -26,3 +26,6 @@ dist-ssr
 # Variaveis de ambiente locais
 .env
 .env.local
+
+# PDFs de fichas (exemplos e fichas pessoais nao devem ir para o repositorio)
+*.pdf
