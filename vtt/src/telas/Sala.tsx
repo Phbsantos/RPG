@@ -316,7 +316,7 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
             codigo={codigo}
             mapa={mapaMestre}
             participantes={participantes}
-            combatentes={combate.combatentes.map((c) => ({ id: c.id, nome: c.nome, donoId: c.donoId }))}
+            combatentes={combate.combatentes.map((c) => ({ id: c.id, nome: c.nome, donoId: c.donoId, oculto: c.oculto }))}
             aoMudar={setMapa}
           />
         )}
@@ -364,8 +364,11 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
         />
 
         <div className="palco-topo">
-          {emAndamento && combatenteDoTurno && (
-            <div className="banner">{minhaVez ? '▶ Sua vez!' : `▶ Vez de ${combatenteDoTurno.nome}`}</div>
+          {emAndamento && (combatenteDoTurno || (!ehMestre && turnoId)) && (
+            <div className="banner">
+              {/* Se a vez é de um combatente oculto, o jogador não sabe quem é: só vê que o mestre está agindo. */}
+              {minhaVez ? '▶ Sua vez!' : combatenteDoTurno ? `▶ Vez de ${combatenteDoTurno.nome}` : '▶ Vez do mestre'}
+            </div>
           )}
           {ehMestre && tokenSelecionado && (
             <BarraToken token={tokenSelecionado} aoMudarMapa={setMapa} aoDesselecionar={() => setSelecionado(null)} />

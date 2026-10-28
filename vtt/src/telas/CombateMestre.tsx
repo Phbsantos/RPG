@@ -25,7 +25,7 @@ type Props = {
   enviarMestre: (msg: Record<string, unknown>) => Promise<void>
 }
 
-const NPC_INICIAL = { nome: '', pv: 10, ca: 12, bonus: 0, qtd: 1 }
+const NPC_INICIAL = { nome: '', pv: 10, ca: 12, bonus: 0, qtd: 1, oculto: false }
 
 const inteiro = (texto: string, padrao: number) => {
   const n = Math.floor(Number(texto))
@@ -81,11 +81,11 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
         pv: { atual: Math.max(1, npc.pv), max: Math.max(1, npc.pv), temp: 0 },
         ca: npc.ca,
         condicoes: [],
-        oculto: false,
+        oculto: npc.oculto, // criado já oculto: o nome nunca chega aos jogadores
       }))
       return { ...c, combatentes: [...c.combatentes, ...adicionados] }
     })
-    setNpc({ ...NPC_INICIAL, ca: npc.ca })
+    setNpc({ ...NPC_INICIAL, ca: npc.ca, oculto: npc.oculto })
   }
 
   function rolarIniciativaDosNpcs() {
@@ -239,7 +239,7 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
       </div>
       <p className="suave" style={{ margin: '6px 0' }}>Clique num combatente para dano, cura e condições.</p>
 
-      <details open={combate.combatentes.length === 0}>
+      <details open>{/* começa aberto e só fecha se a pessoa fechar: não pode sumir ao adicionar um monstro */}
         <summary>Adicionar monstros / NPCs</summary>
         <div className="form-npc">
           <label>Nome<input value={npc.nome} onChange={(e) => setNpc({ ...npc, nome: e.target.value })} maxLength={50} /></label>
@@ -247,13 +247,16 @@ export default function CombateMestre({ combate, aoMudar, participantes, enviarM
           <label>CA<input type="number" min={0} value={npc.ca} onChange={(e) => setNpc({ ...npc, ca: inteiro(e.target.value, 10) })} /></label>
           <label>Bônus de iniciativa<input type="number" value={npc.bonus} onChange={(e) => setNpc({ ...npc, bonus: inteiro(e.target.value, 0) })} /></label>
           <label>Quantidade<input type="number" min={1} max={20} value={npc.qtd} onChange={(e) => setNpc({ ...npc, qtd: inteiro(e.target.value, 1) })} /></label>
+          <label className="ed-check" title="Surpresa: os jogadores não veem este combatente até você revelar">
+            <input type="checkbox" checked={npc.oculto} onChange={(e) => setNpc({ ...npc, oculto: e.target.checked })} /> Oculto
+          </label>
           <button disabled={!npc.nome.trim()} onClick={adicionarNpcs}>Adicionar</button>
         </div>
       </details>
 
       <details>
         <summary>Bestiário (SRD)</summary>
-        <Bestiario aoEscolher={(m) => setNpc({ nome: m.n, pv: m.pv, ca: m.ca, bonus: m.i, qtd: npc.qtd })} />
+        <Bestiario aoEscolher={(m) => setNpc({ nome: m.n, pv: m.pv, ca: m.ca, bonus: m.i, qtd: npc.qtd, oculto: npc.oculto })} />
         <p className="suave">"Usar" preenche o formulário acima (nome, PV, CA e iniciativa); ajuste e clique em Adicionar.</p>
       </details>
       <p className="suave">Dano e cura em jogadores são enviados à ficha deles. Monstros ocultos e o PV exato dos NPCs nunca vão para os jogadores.</p>

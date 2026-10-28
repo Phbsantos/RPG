@@ -7,7 +7,7 @@ type Props = {
   codigo: string
   mapa: Mapa
   participantes: Participante[]
-  combatentes: { id: string; nome: string; donoId?: string }[] // combatentes do mestre, para criar tokens
+  combatentes: { id: string; nome: string; donoId?: string; oculto?: boolean }[] // combatentes do mestre, para criar tokens
   aoMudar: (atualizar: (m: Mapa) => Mapa) => void
 }
 
@@ -22,7 +22,7 @@ export default function MapaConfig({ codigo, mapa, participantes, combatentes, a
   const [mensagem, setMensagem] = useState('')
   const [ocupado, setOcupado] = useState(false)
   const [quadradosNaLargura, setQuadradosNaLargura] = useState(20)
-  const [novo, setNovo] = useState({ nome: '', tamanho: 1, donoId: '' })
+  const [novo, setNovo] = useState({ nome: '', tamanho: 1, donoId: '', oculto: false })
 
   const semToken = combatentes.filter((c) => !mapa.tokens.some((t) => t.combatenteId === c.id))
   const jogadores = participantes.filter((p) => p.papel === 'jogador')
@@ -49,7 +49,7 @@ export default function MapaConfig({ codigo, mapa, participantes, combatentes, a
     await definirImagem(r.url)
   }
 
-  function criarToken(base: { nome: string; donoId?: string; combatenteId?: string }, tamanho: number) {
+  function criarToken(base: { nome: string; donoId?: string; combatenteId?: string; oculto?: boolean }, tamanho: number) {
     aoMudar((m) => {
       const posicao = posicaoLivre(m, tamanho)
       const t: Token = {
@@ -60,7 +60,7 @@ export default function MapaConfig({ codigo, mapa, participantes, combatentes, a
         cor: corDoIndice(m.tokens.length),
         donoId: base.donoId || undefined,
         combatenteId: base.combatenteId,
-        oculto: false,
+        oculto: base.oculto ?? false, // nasce oculto se for de um combatente oculto ou se marcado
       }
       return { ...m, tokens: [...m.tokens, t] }
     })
@@ -127,7 +127,7 @@ export default function MapaConfig({ codigo, mapa, participantes, combatentes, a
             value=""
             onChange={(e) => {
               const c = semToken.find((x) => x.id === e.target.value)
-              if (c) criarToken({ nome: c.nome, donoId: c.donoId, combatenteId: c.id }, 1)
+              if (c) criarToken({ nome: c.nome, donoId: c.donoId, combatenteId: c.id, oculto: c.oculto }, 1)
             }}
           >
             <option value="">{semToken.length ? 'Escolher…' : 'Todos já têm token'}</option>
@@ -164,10 +164,13 @@ export default function MapaConfig({ codigo, mapa, participantes, combatentes, a
             ))}
           </select>
         </label>
+        <label className="ed-check">
+          <input type="checkbox" checked={novo.oculto} onChange={(e) => setNovo({ ...novo, oculto: e.target.checked })} /> Criar oculto
+        </label>
         <button
           disabled={!novo.nome.trim()}
           onClick={() => {
-            criarToken({ nome: novo.nome.trim(), donoId: novo.donoId }, novo.tamanho)
+            criarToken({ nome: novo.nome.trim(), donoId: novo.donoId, oculto: novo.oculto }, novo.tamanho)
             setNovo({ ...novo, nome: '', donoId: '' }) // não herda o dono no próximo token
           }}
         >
