@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "edicao": "2014",
+  "nome": "Elowen Ventobranco",
+  "jogador": "Exemplo",
+  "classes": [{ "nome": "Mago", "nivel": 3, "subclasse": "Escola de Evocação" }],
+  "especie": "Alto Elfo",
+  "antecedente": "Sábio",
+  "tendencia": "Neutro e Bom",
+  "atributos": { "for": 8, "des": 14, "con": 14, "int": 16, "sab": 12, "car": 10 },
+  "proficiencias": {
+    "salvaguardas": ["int", "sab"],
+    "pericias": { "arcanismo": "proficiente", "historia": "proficiente", "investigacao": "proficiente", "medicina": "proficiente" },
+    "idiomas": ["Comum", "Élfico", "Dracônico"],
+    "armas": ["Adagas", "Dardos", "Fundas", "Bordões", "Bestas leves"]
+  },
+  "combate": {
+    "ca": 12,
+    "deslocamento": 9,
+    "pv": { "atual": 20, "max": 20 },
+    "dadosVida": [{ "dado": "d6", "total": 3, "usados": 0 }]
+  },
+  "ataques": [
+    { "nome": "Bordão", "bonus": 1, "dano": "1d6-1", "tipoDano": "contundente" },
+    { "nome": "Raio de Fogo", "bonus": 5, "dano": "1d10", "tipoDano": "fogo", "notas": "Truque, alcance 36 m" }
+  ],
+  "conjuracao": {
+    "atributo": "int",
+    "espacos": { "1": { "total": 4, "usados": 0 }, "2": { "total": 2, "usados": 0 } },
+    "truques": ["Raio de Fogo", "Mãos Mágicas", "Luz", "Prestidigitação"],
+    "magias": [
+      { "nome": "Mísseis Mágicos", "nivel": 1, "preparada": true },
+      { "nome": "Escudo Arcano", "nivel": 1, "preparada": true },
+      { "nome": "Armadura Arcana", "nivel": 1, "preparada": true },
+      { "nome": "Sono", "nivel": 1, "preparada": false },
+      { "nome": "Imagem Espelhada", "nivel": 2, "preparada": true },
+      { "nome": "Esfera Flamejante", "nivel": 2, "preparada": true }
+    ]
+  },
+  "caracteristicas": [
+    { "nome": "Recuperação Arcana", "fonte": "Mago 1", "descricao": "Uma vez por dia, no descanso curto, recupera espaços de magia (total de níveis até 2).", "usosMax": 1, "recarga": "longo" },
+    { "nome": "Visão no Escuro", "fonte": "Elfo", "descricao": "Enxerga 18 m no escuro." },
+    { "nome": "Ancestral Feérico", "fonte": "Elfo", "descricao": "Vantagem contra ser enfeitiçado; imune a sono mágico." }
+  ],
+  "inventario": [
+    { "nome": "Grimório", "quantidade": 1, "equipado": true },
+    { "nome": "Bordão", "quantidade": 1, "equipado": true },
+    { "nome": "Poção de Cura", "quantidade": 2 },
+    { "nome": "Mochila de aventureiro", "quantidade": 1 }
+  ],
+  "moedas": { "po": 25 }
+}

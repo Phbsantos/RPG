@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "edicao": "2024",
+  "nome": "Brann Martelo-de-Ferro",
+  "jogador": "Exemplo",
+  "classes": [{ "nome": "Guerreiro", "nivel": 3, "subclasse": "Campeão" }],
+  "especie": "Anão",
+  "antecedente": "Soldado",
+  "tendencia": "Leal e Neutro",
+  "atributos": { "for": 16, "des": 12, "con": 16, "int": 10, "sab": 12, "car": 8 },
+  "proficiencias": {
+    "salvaguardas": ["for", "con"],
+    "pericias": { "atletismo": "proficiente", "intimidacao": "proficiente", "percepcao": "proficiente", "sobrevivencia": "proficiente" },
+    "ferramentas": ["Ferramentas de ferreiro", "Jogo de dados"],
+    "idiomas": ["Comum", "Anão"],
+    "armas": ["Armas simples", "Armas marciais"],
+    "armaduras": ["Todas as armaduras", "Escudos"]
+  },
+  "combate": {
+    "ca": 18,
+    "deslocamento": 9,
+    "pv": { "atual": 31, "max": 31 },
+    "dadosVida": [{ "dado": "d10", "total": 3, "usados": 0 }]
+  },
+  "ataques": [
+    { "nome": "Espada Longa", "bonus": 5, "dano": "1d8+3", "tipoDano": "cortante", "notas": "Maestria: Rasgar" },
+    { "nome": "Machadinha", "bonus": 5, "dano": "1d6+3", "tipoDano": "cortante", "notas": "Arremesso 6/18 m. Maestria: Vexar" }
+  ],
+  "caracteristicas": [
+    { "nome": "Retomar o Fôlego", "fonte": "Guerreiro 1", "descricao": "Ação bônus: recupera 1d10 + nível de PV. Recupera 1 uso no descanso curto e todos no longo.", "usosMax": 2, "recarga": "longo" },
+    { "nome": "Surto de Ação", "fonte": "Guerreiro 2", "descricao": "Uma ação adicional no seu turno.", "usosMax": 1, "recarga": "curto" },
+    { "nome": "Crítico Aprimorado", "fonte": "Campeão 3", "descricao": "Acertos críticos com 19 ou 20 no d20." },
+    { "nome": "Resiliência Anã", "fonte": "Espécie", "descricao": "Resistência a dano de veneno e vantagem em salvaguardas contra envenenamento." }
+  ],
+  "talentos": ["Capaz de Sobreviver"],
+  "maestriasArmas": ["Espada Longa", "Machadinha", "Maça"],
+  "inventario": [
+    { "nome": "Cota de malha", "quantidade": 1, "equipado": true },
+    { "nome": "Escudo", "quantidade": 1, "equipado": true },
+    { "nome": "Espada Longa", "quantidade": 1, "equipado": true },
+    { "nome": "Machadinha", "quantidade": 2 },
+    { "nome": "Mochila de aventureiro", "quantidade": 1 }
+  ],
+  "moedas": { "po": 15, "pp": 8 }
+}
