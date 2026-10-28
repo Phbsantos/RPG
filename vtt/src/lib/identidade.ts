@@ -38,6 +38,20 @@ export function obterId(): string {
 export const obterNome = () => ler(CHAVE_NOME) ?? ''
 export const salvarNome = (nome: string) => gravar(CHAVE_NOME, nome.trim())
 
-export const marcarComoMestre = (codigo: string) => gravar(prefixoMestre(codigo), '1')
+/** Códigos das salas em que este navegador é o mestre (para retomar o combate e o mapa salvos). */
+export function salasDoMestre(): string[] {
+  const codigos: string[] = []
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const m = localStorage.key(i)?.match(/^vtt:mestre:([A-Z0-9]{6})$/)
+      if (m && localStorage.getItem(m[0]) === '1') codigos.push(m[1])
+    }
+  } catch {
+    // sem armazenamento: nenhuma sala para retomar
+  }
+  return codigos
+}
+
+export const marcarComoMestre =(codigo: string) => gravar(prefixoMestre(codigo), '1')
 export const papelNaSala = (codigo: string): Papel =>
   ler(prefixoMestre(codigo)) === '1' ? 'mestre' : 'jogador'
