@@ -288,6 +288,29 @@ button.grande {
   letter-spacing: 0.12em;
 }
 
+.sala-anterior {
+  display: inline-flex;
+}
+
+.sala-anterior > button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.retomar .esquecer {
+  font-family: inherit;
+  letter-spacing: 0;
+  padding: 0 8px;
+  border-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  color: var(--suave);
+}
+
+.retomar .esquecer:hover {
+  color: #ff6b6b;
+}
+
 .dica {
   text-align: center;
   margin-top: 14px;

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { marcarComoMestre, obterNome, salasDoMestre, salvarNome } from '../lib/identidade'
+import { esquecerSala, marcarComoMestre, obterNome, salasDoMestre, salvarNome } from '../lib/identidade'
 import { gerarCodigo, normalizarCodigo, TAMANHO_CODIGO } from '../lib/sala'
 import { criarChavesDeMestre } from '../lib/seguranca'
 
@@ -12,7 +12,7 @@ export default function Inicio({ irParaSala, irParaEditor }: Props) {
   const [codigo, setCodigo] = useState('')
   const [erro, setErro] = useState('')
   const [ocupado, setOcupado] = useState(false)
-  const [anteriores] = useState(() => salasDoMestre().slice(0, 4))
+  const [anteriores, setAnteriores] = useState(() => salasDoMestre().slice(0, 4))
 
   const nomeValido = nome.trim().length > 0
   const codigoValido = codigo.length === TAMANHO_CODIGO
@@ -84,9 +84,23 @@ export default function Inicio({ irParaSala, irParaEditor }: Props) {
                 <small>Retomar uma sala sua</small>
                 <div className="acoes">
                   {anteriores.map((s) => (
-                    <button key={s} disabled={!nomeValido} onClick={() => retomar(s)} title="Reabrir esta sala com o combate e o mapa salvos">
-                      {s}
-                    </button>
+                    <span key={s} className="sala-anterior">
+                      <button disabled={!nomeValido} onClick={() => retomar(s)} title="Reabrir esta sala com o combate e o mapa salvos">
+                        {s}
+                      </button>
+                      <button
+                        className="esquecer"
+                        aria-label={`Esquecer a sala ${s}`}
+                        title="Apagar esta sala deste navegador"
+                        onClick={() => {
+                          if (!confirm(`Apagar a sala ${s} deste navegador?\n\nO combate, o mapa e a chave de mestre dela serão perdidos e você não poderá mais ser o mestre dessa sala.`)) return
+                          esquecerSala(s)
+                          setAnteriores(salasDoMestre().slice(0, 4))
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </span>
                   ))}
                 </div>
               </div>

@@ -52,6 +52,17 @@ export function salasDoMestre(): string[] {
   return codigos
 }
 
+/** Apaga deste navegador tudo o que a sala tem: papel de mestre, chaves, combate e mapa. Não dá para desfazer. */
+export function esquecerSala(codigo: string) {
+  try {
+    for (const prefixo of ['vtt:mestre:', 'vtt:mestre-chave:', 'vtt:chave-mestre:', 'vtt:combate:', 'vtt:mapa:']) {
+      localStorage.removeItem(prefixo + codigo)
+    }
+  } catch {
+    // sem armazenamento: nada a apagar
+  }
+}
+
 export const marcarComoMestre =(codigo: string) => gravar(prefixoMestre(codigo), '1')
 export const papelNaSala = (codigo: string): Papel =>
   ler(prefixoMestre(codigo)) === '1' ? 'mestre' : 'jogador'
