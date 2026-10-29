@@ -93,7 +93,9 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
   const papel = papelNaSala(codigo)
   const ehMestre = papel === 'mestre'
   const meuId = obterId()
-  const [ficha, setFicha] = useState<Ficha | null>(carregarRascunho)
+  // A ficha guardada no navegador é a do jogador: o mestre começa sem ela e a que ele carregar não é gravada,
+  // para não sobrescrever a ficha que este navegador usa quando joga.
+  const [ficha, setFicha] = useState<Ficha | null>(() => (ehMestre ? null : carregarRascunho()))
   const fichaRef = useRef(ficha)
   useEffect(() => {
     fichaRef.current = ficha
@@ -229,12 +231,12 @@ function SalaConectada({ codigo, nome, sair }: Props & { nome: string }) {
 
   function mudarFicha(nova: Ficha) {
     setFicha(nova)
-    salvarRascunho(nova)
+    if (!ehMestre) salvarRascunho(nova)
   }
 
   function removerFicha() {
     if (!window.confirm('Remover a ficha desta sessão? Baixe o JSON antes se quiser guardar as alterações.')) return
-    descartarRascunho()
+    if (!ehMestre) descartarRascunho()
     setFicha(null)
     setFichaAberta(false)
   }
