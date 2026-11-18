@@ -40,11 +40,14 @@ export default function PainelDados({ rolagens, modo, aoMudarModo, ehMestre, err
       </form>
 
       <div className="acoes" style={{ marginTop: 8 }}>
-        <select value={modo} onChange={(e) => aoMudarModo(e.target.value as ModoD20)} aria-label="Modo do d20">
-          <option value="normal">Normal</option>
-          <option value="vantagem">Vantagem</option>
-          <option value="desvantagem">Desvantagem</option>
-        </select>
+        {/* Clicar no botão ligado volta ao modo normal. */}
+        <div className="modo-d20" role="group" aria-label="Modo do d20">
+          {(['vantagem', 'desvantagem'] as const).map((m) => (
+            <button key={m} className={`${m} ${modo === m ? 'ligado' : ''}`} aria-pressed={modo === m} onClick={() => aoMudarModo(modo === m ? 'normal' : m)}>
+              {m === 'vantagem' ? 'Vantagem' : 'Desvantagem'}
+            </button>
+          ))}
+        </div>
         {ehMestre && (
           <label>
             <input type="checkbox" checked={secreta} onChange={(e) => setSecreta(e.target.checked)} /> Secreta (só eu vejo)

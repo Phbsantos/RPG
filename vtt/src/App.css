@@ -1189,6 +1189,27 @@ textarea {
   color: #1a1200;
 }
 
+.modo-d20 {
+  display: flex;
+  gap: 6px;
+}
+
+.modo-d20 button {
+  font-weight: 600;
+}
+
+.modo-d20 button.vantagem.ligado {
+  background: #1f6b43;
+  border-color: #3ecf8e;
+  color: #fff;
+}
+
+.modo-d20 button.desvantagem.ligado {
+  background: #7a2527;
+  border-color: #ff6b6b;
+  color: #fff;
+}
+
 .historico {
   list-style: none;
   padding: 0;
