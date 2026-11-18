@@ -1239,6 +1239,48 @@ textarea {
   font-size: 1.1rem;
 }
 
+/* Rolagem nova: números girando e, ao revelar, o total "pula"; críticos ganham um brilho. */
+.historico li.girando {
+  border-left-color: var(--ouro);
+  font-variant-numeric: tabular-nums;
+}
+
+.historico li.revelada .total {
+  display: inline-block;
+  animation: total-pula 0.35s ease-out;
+}
+
+.historico li.revelada.critico {
+  animation: brilho-critico 1.2s ease-out;
+}
+
+.historico li.revelada.falha {
+  animation: brilho-falha 1.2s ease-out;
+}
+
+@keyframes total-pula {
+  0% { transform: scale(0.6); opacity: 0.4; }
+  60% { transform: scale(1.35); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes brilho-critico {
+  0% { box-shadow: 0 0 0 0 rgba(255, 210, 63, 0.9), inset 0 0 18px rgba(255, 210, 63, 0.5); }
+  100% { box-shadow: 0 0 0 14px rgba(255, 210, 63, 0), inset 0 0 0 rgba(255, 210, 63, 0); }
+}
+
+@keyframes brilho-falha {
+  0% { box-shadow: 0 0 0 0 rgba(229, 37, 42, 0.9), inset 0 0 18px rgba(229, 37, 42, 0.5); }
+  100% { box-shadow: 0 0 0 14px rgba(229, 37, 42, 0), inset 0 0 0 rgba(229, 37, 42, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .historico li.revelada,
+  .historico li.revelada .total {
+    animation: none;
+  }
+}
+
 button.rolavel {
   padding: 1px 8px;
   font: inherit;

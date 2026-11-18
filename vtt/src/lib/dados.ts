@@ -153,6 +153,14 @@ export function rolar(
 
 export type ModoD20 = 'normal' | 'vantagem' | 'desvantagem'
 
+const DADO_D20 = { normal: '1d20', vantagem: '2d20kh1', desvantagem: '2d20kl1' } as const
+
+/** Se a fórmula começa com um d20 (1d20, 2d20kh1 ou 2d20kl1), troca esse d20 pelo do modo; o resto (bônus, etc.) fica. */
+export function aplicarModoD20(formula: string, modo: ModoD20): string {
+  const m = formula.match(/^(\s*)(?:1d20|2d20k[hl]1)(?![\dk])(.*)$/i)
+  return m ? `${m[1]}${DADO_D20[modo]}${m[2]}` : formula
+}
+
 // Monta a fórmula de um teste de d20 com o bônus dado (ex.: vantagem, +5 → "2d20kh1+5").
 export function formulaTeste(bonus: number, modo: ModoD20): string {
   const dado = modo === 'vantagem' ? '2d20kh1' : modo === 'desvantagem' ? '2d20kl1' : '1d20'
