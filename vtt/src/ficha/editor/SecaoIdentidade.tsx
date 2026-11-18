@@ -11,7 +11,13 @@ type Props = { ficha: Ficha; mudar: (f: Ficha) => void }
 export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
   const em2014 = f.edicao === '2014'
   const [painel, setPainel] = useState<'especie' | 'classe' | null>(null)
+  const [alvoClasse, setAlvoClasse] = useState(0) // linha de classe em que se clicou em "Importar"
   const alternar = (qual: 'especie' | 'classe') => setPainel(painel === qual ? null : qual)
+  const alternarClasse = (i: number) => {
+    const fechar = painel === 'classe' && alvoClasse === i
+    setAlvoClasse(i)
+    setPainel(fechar ? null : 'classe')
+  }
   return (
     <div className="ed-secao">
       <div className="ed-grade">
@@ -66,12 +72,12 @@ export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
         novo={() => ({ nome: '', nivel: 1 })}
         rotuloAdicionar="Adicionar classe (multiclasse)"
         max={12}
-        render={(c, m) => (
+        render={(c, m, i) => (
           <>
             <Campo
               rotulo="Classe *"
               dica="Pode digitar qualquer classe, mesmo de outros livros."
-              acao={<BotaoImportar alvo="classe" ativo={painel === 'classe'} aoClicar={() => alternar('classe')} />}
+              acao={<BotaoImportar alvo="classe" ativo={painel === 'classe' && alvoClasse === i} aoClicar={() => alternarClasse(i)} />}
             >
               <Txt valor={c.nome} aoMudar={(nome) => m({ nome })} max={40} lista="classes-conhecidas" rotulo="Classe" />
             </Campo>
@@ -84,7 +90,7 @@ export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
           </>
         )}
       />
-      <ImportarClasse ficha={f} mudar={mudar} aberto={painel === 'classe'} aoFechar={() => setPainel(null)} />
+      <ImportarClasse ficha={f} mudar={mudar} aberto={painel === 'classe'} aoFechar={() => setPainel(null)} indiceClasse={alvoClasse} />
     </div>
   )
 }

@@ -124,10 +124,12 @@ const normalizar = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toL
 export const nomeDaClasse = (nomeNoArquivo: string) => NOMES_PT[normalizar(nomeNoArquivo)] ?? nomeNoArquivo
 
 /** A ficha tem essa classe? Devolve a entrada (para achar nível e subclasse), comparando em inglês ou português. */
-export function classeDaFicha(ficha: Ficha, nomeNoArquivo: string) {
+export function indiceDaClasse(ficha: Ficha, nomeNoArquivo: string) {
   const alvo = normalizar(nomeDaClasse(nomeNoArquivo))
-  return ficha.classes.find((c) => normalizar(c.nome) === alvo || normalizar(c.nome) === normalizar(nomeNoArquivo))
+  return ficha.classes.findIndex((c) => normalizar(c.nome) === alvo || normalizar(c.nome) === normalizar(nomeNoArquivo))
 }
+
+export const classeDaFicha = (ficha: Ficha, nomeNoArquivo: string) => ficha.classes[indiceDaClasse(ficha, nomeNoArquivo)]
 
 /** Entradas genéricas ("Subclass feature", "Ability Score Improvement") não têm texto próprio: não valem a pena. */
 export const ehGenerica = (h: HabilidadeLida) => /^(.+\s)?subclass(\sfeature)?$|^ability score improvement$/i.test(h.nome.trim())

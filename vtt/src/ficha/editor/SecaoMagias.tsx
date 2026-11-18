@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { ATRIBUTOS, NOMES_ATRIBUTO, type Ficha } from '../esquema'
+import { ATRIBUTOS, LIMITE_DESCRICAO, NOMES_ATRIBUTO, type Ficha } from '../esquema'
 import { aplicarEspacos, type TipoConjurador } from '../novaFicha'
 import { nivelTotal } from '../regras'
-import { BotaoImportar, Campo, Etiquetas, Lista, Num, Txt } from './campos'
+import { Area, BotaoImportar, Campo, Etiquetas, Lista, Num, Txt } from './campos'
 import ImportarEquipo from './ImportarEquipo'
 
 type Props = { ficha: Ficha; mudar: (f: Ficha) => void }
@@ -34,6 +34,14 @@ export default function SecaoMagias({ ficha: f, mudar }: Props) {
     const novo = { ...conj, ...parcial }
     const nomes = new Set([...novo.truques, ...novo.magias.map((x) => x.nome)])
     mudar({ ...f, conjuracao: { ...novo, descricoes: Object.fromEntries(Object.entries(novo.descricoes).filter(([n]) => nomes.has(n))) } })
+  }
+  // Escrever a descrição de uma magia/truque (texto vazio apaga).
+  const definirTexto = (nome: string, texto: string) => {
+    if (!nome) return
+    const descricoes = { ...conj.descricoes }
+    if (texto) descricoes[nome] = texto
+    else delete descricoes[nome]
+    alterar({ descricoes })
   }
   // Renomear uma magia leva o texto junto.
   const mudarMagias = (magias: typeof conj.magias) => {
@@ -102,6 +110,24 @@ export default function SecaoMagias({ ficha: f, mudar }: Props) {
           acao={<BotaoImportar alvo="magia" ativo={painel} aoClicar={() => setPainel(!painel)} />}
         />
       </div>
+      {conj.truques.some((t) => conj.descricoes[t] !== undefined) && (
+        <details className="ed-textos-truques">
+          <summary>Texto dos truques</summary>
+          {conj.truques
+            .filter((t) => conj.descricoes[t] !== undefined)
+            .map((t) => (
+              <Campo key={t} rotulo={t} largo>
+                <Area
+                  valor={conj.descricoes[t]}
+                  aoMudar={(texto) => definirTexto(t, texto)}
+                  max={LIMITE_DESCRICAO}
+                  linhas={Math.min(10, Math.max(3, conj.descricoes[t].split('\n').length))}
+                  rotulo={`Descrição do truque ${t}`}
+                />
+              </Campo>
+            ))}
+        </details>
+      )}
       <ImportarEquipo ficha={f} mudar={mudar} tipo="magia" aberto={painel} aoFechar={() => setPainel(false)} aviso={aviso} aoAviso={setAviso} />
 
       <div className="ed-subtitulo-linha">
@@ -127,6 +153,15 @@ export default function SecaoMagias({ ficha: f, mudar }: Props) {
             </label>
             <Campo rotulo="Notas" largo>
               <Txt valor={m.notas ?? ''} aoMudar={(notas) => mud({ notas: notas || undefined })} max={300} rotulo="Notas da magia" />
+            </Campo>
+            <Campo rotulo="Descrição" largo dica={m.nome ? undefined : 'Dê um nome à magia para poder escrever a descrição.'}>
+              <Area
+                valor={conj.descricoes[m.nome] ?? ''}
+                aoMudar={(t) => definirTexto(m.nome, t)}
+                max={LIMITE_DESCRICAO}
+                linhas={Math.min(10, Math.max(3, (conj.descricoes[m.nome] ?? '').split('\n').length))}
+                rotulo="Descrição da magia"
+              />
             </Campo>
           </>
         )}

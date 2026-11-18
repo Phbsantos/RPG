@@ -4,6 +4,7 @@ import { LIMITE_DESCRICAO, type Ficha } from '../esquema'
 import { bonusProficiencia, modificador } from '../regras'
 import {
   classeDaFicha,
+  indiceDaClasse,
   ehGenerica,
   lerClasses,
   nomeDaClasse,
@@ -13,13 +14,14 @@ import {
   type HabilidadeLida,
 } from '../importarClasse'
 
-type Props = { ficha: Ficha; mudar: (f: Ficha) => void; aberto: boolean; aoFechar: () => void }
+// `indiceClasse` é a linha de classe em que o usuário clicou em "Importar": é ela que recebe nome, nível e subclasse.
+type Props = { ficha: Ficha; mudar: (f: Ficha) => void; aberto: boolean; aoFechar: () => void; indiceClasse: number }
 
 type Candidata = { id: string; habilidade: HabilidadeLida; fonte: string }
 
 // Lê o texto .md de uma classe (arquivo, colado ou da área de transferência; é do próprio usuário) e adiciona as
 // habilidades até o nível escolhido como características. O conteúdo não sai do navegador.
-export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props) {
+export default function ImportarClasse({ ficha, mudar, aberto, aoFechar, indiceClasse }: Props) {
   const [classes, setClasses] = useState<ClasseLida[]>([])
   const [arquivo, setArquivo] = useState('')
   const [erro, setErro] = useState('')
@@ -41,7 +43,7 @@ export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props
     setIndice(i)
     setDesmarcadas(new Set())
     const naFicha = classeDaFicha(ficha, c.nome)
-    setNivel(naFicha?.nivel ?? Math.max(1, ficha.classes[0]?.nivel ?? 1))
+    setNivel(naFicha?.nivel ?? ficha.classes[indiceClasse]?.nivel ?? 1)
     const sub = naFicha?.subclasse?.trim().toLowerCase()
     const achada = sub ? c.subclasses.findIndex((s) => sub.includes(s.nome.toLowerCase()) || s.nome.toLowerCase().includes(sub)) : -1
     setSubclasse(achada)
@@ -75,6 +77,16 @@ export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props
     return [...dessa, ...daSub]
   }, [classe, subclasse, nivel])
 
+  // Linha de classe da ficha que será atualizada: a que já é essa classe; senão, a linha onde se clicou em "Importar".
+  const nomeFinal = classe ? nomeDaClasse(classe.nome) : ''
+  const existente = classe ? indiceDaClasse(ficha, classe.nome) : -1
+  const alvo = existente >= 0 ? existente : Math.min(indiceClasse, ficha.classes.length - 1)
+  const atual = ficha.classes[alvo] as Ficha['classes'][number] | undefined
+  const subEscolhida = classe && subclasse >= 0 ? classe.subclasses[subclasse].nome : undefined
+  const novoNome = existente >= 0 ? atual!.nome : nomeFinal
+  const atualiza = !!classe && !!atual && (atual.nome !== novoNome || atual.nivel !== nivel || (subEscolhida !== undefined && atual.subclasse !== subEscolhida))
+  const aplicarClasse = atualiza && !desmarcadas.has('extra-classe')
+
   const jaExiste = (c: Candidata) => ficha.caracteristicas.some((x) => x.nome === c.habilidade.nome.slice(0, 80) && x.fonte === c.fonte)
   const escolhidas = candidatas.filter((c) => !desmarcadas.has(c.id) && !jaExiste(c))
 
@@ -91,15 +103,17 @@ export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props
       if (r.cortada) cortadas++
       return r.caracteristica
     })
-    mudar({ ...ficha, caracteristicas: [...ficha.caracteristicas, ...novas] })
-    setAviso(`${novas.length} característica(s) adicionada(s).${cortadas ? ` ${cortadas} texto(s) foram cortados no limite de ${LIMITE_DESCRICAO} caracteres.` : ''}`)
+    const classesNovas = aplicarClasse
+      ? ficha.classes.map((x, i) => (i === alvo ? { ...x, nome: novoNome.slice(0, 40), nivel, subclasse: (subEscolhida ?? x.subclasse)?.slice(0, 60) || undefined } : x))
+      : ficha.classes
+    mudar({ ...ficha, classes: classesNovas, caracteristicas: [...ficha.caracteristicas, ...novas] })
+    setAviso(`${novas.length} característica(s) adicionada(s).${aplicarClasse ? ` Classe atualizada: ${novoNome}, nível ${nivel}.` : ''}${cortadas ? ` ${cortadas} texto(s) foram cortados no limite de ${LIMITE_DESCRICAO} caracteres.` : ''}`)
     setClasses([])
     setArquivo('')
   }
 
   if (!aberto) return null
 
-  const nivelNaFicha = classe ? classeDaFicha(ficha, classe.nome) : undefined
   return (
     <div className="ed-importar aberto">
       <div className="ed-importar-topo">
@@ -137,7 +151,7 @@ export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props
               </label>
             )}
             <label className="ed-campo">
-              <span>Até o nível {nivelNaFicha ? '' : '(a ficha não tem essa classe)'}</span>
+              <span>Até o nível</span>
               <input type="number" min={1} max={20} value={nivel} aria-label="Importar até o nível" onChange={(e) => setNivel(Math.min(20, Math.max(1, Math.round(Number(e.target.value)) || 1)))} />
             </label>
             <label className="ed-campo">
@@ -154,6 +168,24 @@ export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props
           </div>
 
           <ul className="ed-importar-lista">
+            {atualiza && atual && (
+              <li>
+                <label>
+                  <input type="checkbox" checked={aplicarClasse} onChange={() => alternar('extra-classe')} />
+                  <span>
+                    Atualizar a classe da ficha:{' '}
+                    <strong>
+                      {novoNome} · nível {nivel}
+                      {subEscolhida ? ` · ${subEscolhida}` : ''}
+                    </strong>{' '}
+                    <span className="suave">
+                      (hoje: {atual.nome || 'sem nome'}, nível {atual.nivel}
+                      {atual.subclasse ? `, ${atual.subclasse}` : ''})
+                    </span>
+                  </span>
+                </label>
+              </li>
+            )}
             {candidatas.map((c) => {
               const existe = jaExiste(c)
               const { caracteristica, cortada } = paraCaracteristica(c.habilidade, c.fonte, ctx, LIMITE_DESCRICAO)
@@ -185,8 +217,8 @@ export default function ImportarClasse({ ficha, mudar, aberto, aoFechar }: Props
             Usos e recarga só são preenchidos quando o texto diz com clareza; confira no editor. Entradas genéricas
             (“Subclass feature”, “Ability Score Improvement”) são ignoradas.
           </p>
-          <button className="pri" disabled={escolhidas.length === 0} onClick={adicionar}>
-            Adicionar {escolhidas.length} à ficha
+          <button className="pri" disabled={escolhidas.length === 0 && !aplicarClasse} onClick={adicionar}>
+            Adicionar à ficha ({escolhidas.length} habilidade(s){aplicarClasse ? ' + classe' : ''})
           </button>
         </>
       )}
