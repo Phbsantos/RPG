@@ -2,13 +2,30 @@ import { useState, type ReactNode } from 'react'
 
 // Campos reutilizáveis do editor de ficha.
 
-export function Campo({ rotulo, dica, children, largo }: { rotulo: string; dica?: string; children: ReactNode; largo?: boolean }) {
+/** `acao` (ex.: botão "Importar") fica ao lado do campo. Vem depois dele no HTML para o rótulo continuar apontando para o campo. */
+export function Campo({ rotulo, dica, children, largo, acao }: { rotulo: string; dica?: string; children: ReactNode; largo?: boolean; acao?: ReactNode }) {
   return (
     <label className={`ed-campo ${largo ? 'largo' : ''}`}>
       <span>{rotulo}</span>
-      {children}
+      {acao ? (
+        <div className="ed-campo-linha">
+          {children}
+          {acao}
+        </div>
+      ) : (
+        children
+      )}
       {dica && <small className="suave">{dica}</small>}
     </label>
+  )
+}
+
+/** Botão pequeno de importação, para ficar ao lado de um campo. */
+export function BotaoImportar({ alvo, aoClicar, ativo }: { alvo: string; aoClicar: () => void; ativo?: boolean }) {
+  return (
+    <button type="button" className={`ed-importar-botao ${ativo ? 'ativo' : ''}`} aria-label={`Importar ${alvo}`} aria-pressed={ativo} title={`Importar ${alvo} de um texto .md (colar, área de transferência ou arquivo)`} onClick={aoClicar}>
+      ⤓ Importar
+    </button>
   )
 }
 
@@ -52,7 +69,7 @@ export function Area({ valor, aoMudar, max = 2000, linhas = 3, placeholder, rotu
 }
 
 /** Lista de textos curtos (idiomas, ferramentas, talentos…): digita e aperta Enter para adicionar. */
-export function Etiquetas({ rotulo, itens, aoMudar, placeholder, max = 80 }: { rotulo: string; itens: string[]; aoMudar: (i: string[]) => void; placeholder?: string; max?: number }) {
+export function Etiquetas({ rotulo, itens, aoMudar, placeholder, max = 80, acao }: { rotulo: string; itens: string[]; aoMudar: (i: string[]) => void; placeholder?: string; max?: number; acao?: ReactNode }) {
   const [novo, setNovo] = useState('')
   const adicionar = () => {
     const t = novo.trim()
@@ -61,7 +78,10 @@ export function Etiquetas({ rotulo, itens, aoMudar, placeholder, max = 80 }: { r
   }
   return (
     <div className="ed-etiquetas">
-      <span className="ed-rotulo">{rotulo}</span>
+      <div className="ed-campo-topo">
+        <span className="ed-rotulo">{rotulo}</span>
+        {acao}
+      </div>
       <div className="etiquetas">
         {itens.map((t) => (
           <button key={t} type="button" className="etiqueta" title="Remover" onClick={() => aoMudar(itens.filter((x) => x !== t))}>

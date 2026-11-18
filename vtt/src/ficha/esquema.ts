@@ -59,11 +59,13 @@ export const CONDICOES = [
 const inteiro = (min: number, max: number) => z.number().int().min(min).max(max)
 const texto = (max = 200) => z.string().max(max)
 
+export const LIMITE_DESCRICAO = 8000 // características de classe longas (ex.: itens mágicos do Artífice) passam de 2000
+
 const Caracteristica = z
   .object({
     nome: z.string().min(1).max(80),
     fonte: texto(80).optional(), // "Guerreiro 1", "Espécie", "Talento"…
-    descricao: texto(2000).default(''),
+    descricao: texto(LIMITE_DESCRICAO).default(''),
     usosMax: inteiro(1, 99).optional(),
     usosAtuais: inteiro(0, 99).optional(),
     recarga: z.enum(['curto', 'longo']).optional(),
@@ -167,6 +169,8 @@ export const FichaSchema = z
             }),
           )
           .default([]),
+        // Texto completo de magias e truques, por nome (vem dos importadores de .md).
+        descricoes: z.record(z.string().max(80), z.string().max(LIMITE_DESCRICAO)).default({}),
       })
       .optional(),
 
@@ -182,6 +186,7 @@ export const FichaSchema = z
           peso: z.number().min(0).optional(),
           equipado: z.boolean().default(false),
           notas: texto(300).optional(),
+          descricao: texto(LIMITE_DESCRICAO).optional(), // texto completo do item (importadores de .md)
         }),
       )
       .default([]),

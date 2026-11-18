@@ -1,11 +1,14 @@
-import type { Ficha } from '../esquema'
-import { Area, Campo, Etiquetas, Lista, Num, Txt } from './campos'
+import { useState } from 'react'
+import { LIMITE_DESCRICAO, type Ficha } from '../esquema'
+import { Area, BotaoImportar, Campo, Etiquetas, Lista, Num, Txt } from './campos'
+import ImportarOrigem from './ImportarOrigem'
 
 type Props = { ficha: Ficha; mudar: (f: Ficha) => void }
 
 type Caract = Ficha['caracteristicas'][number]
 
 export default function SecaoCaracteristicas({ ficha: f, mudar }: Props) {
+  const [talentoAberto, setTalentoAberto] = useState(false)
   return (
     <div className="ed-secao">
       <p className="suave">
@@ -53,18 +56,24 @@ export default function SecaoCaracteristicas({ ficha: f, mudar }: Props) {
               </select>
             </Campo>
             <Campo rotulo="Descrição" largo>
-              <Area valor={c.descricao} aoMudar={(descricao) => m({ descricao })} rotulo="Descrição da característica" />
+              <Area valor={c.descricao} aoMudar={(descricao) => m({ descricao })} rotulo="Descrição da característica" max={LIMITE_DESCRICAO} />
             </Campo>
           </>
         )}
       />
 
       <div className="ed-grade" style={{ marginTop: 16 }}>
-        <Etiquetas rotulo="Talentos" itens={f.talentos} aoMudar={(talentos) => mudar({ ...f, talentos })} />
+        <Etiquetas
+          rotulo="Talentos"
+          itens={f.talentos}
+          aoMudar={(talentos) => mudar({ ...f, talentos })}
+          acao={<BotaoImportar alvo="talento" ativo={talentoAberto} aoClicar={() => setTalentoAberto(!talentoAberto)} />}
+        />
         {f.edicao === '2024' && (
           <Etiquetas rotulo="Maestrias de armas" itens={f.maestriasArmas ?? []} aoMudar={(maestriasArmas) => mudar({ ...f, maestriasArmas })} />
         )}
       </div>
+      <ImportarOrigem ficha={f} mudar={mudar} tipo="talento" aberto={talentoAberto} aoFechar={() => setTalentoAberto(false)} />
     </div>
   )
 }

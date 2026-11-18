@@ -1,12 +1,17 @@
+import { useState } from 'react'
 import type { Ficha } from '../esquema'
 import { CLASSES_CONHECIDAS } from '../novaFicha'
 import { nivelTotal } from '../regras'
-import { Campo, Lista, Num, Txt } from './campos'
+import { BotaoImportar, Campo, Lista, Num, Txt } from './campos'
+import ImportarClasse from './ImportarClasse'
+import ImportarOrigem from './ImportarOrigem'
 
 type Props = { ficha: Ficha; mudar: (f: Ficha) => void }
 
 export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
   const em2014 = f.edicao === '2014'
+  const [painel, setPainel] = useState<'especie' | 'classe' | null>(null)
+  const alternar = (qual: 'especie' | 'classe') => setPainel(painel === qual ? null : qual)
   return (
     <div className="ed-secao">
       <div className="ed-grade">
@@ -29,7 +34,11 @@ export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
             <option value="2024">D&amp;D 2024</option>
           </select>
         </Campo>
-        <Campo rotulo={em2014 ? 'Raça *' : 'Espécie *'} dica={em2014 ? 'Ex.: Anão da Colina, Alto Elfo' : 'Ex.: Anão, Elfo'}>
+        <Campo
+          rotulo={em2014 ? 'Raça *' : 'Espécie *'}
+          dica={em2014 ? 'Ex.: Anão da Colina, Alto Elfo' : 'Ex.: Anão, Elfo'}
+          acao={<BotaoImportar alvo={em2014 ? 'raça' : 'espécie'} ativo={painel === 'especie'} aoClicar={() => alternar('especie')} />}
+        >
           <Txt valor={f.especie} aoMudar={(especie) => mudar({ ...f, especie })} rotulo={em2014 ? 'Raça' : 'Espécie'} />
         </Campo>
         <Campo rotulo="Antecedente *">
@@ -42,6 +51,8 @@ export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
           <Num valor={f.experiencia} aoMudar={(experiencia) => mudar({ ...f, experiencia })} min={0} max={10_000_000} rotulo="Pontos de experiência" />
         </Campo>
       </div>
+
+      <ImportarOrigem ficha={f} mudar={mudar} tipo="especie" aberto={painel === 'especie'} aoFechar={() => setPainel(null)} />
 
       <h4 className="ed-subtitulo">Classes (nível total {nivelTotal(f)})</h4>
       <datalist id="classes-conhecidas">
@@ -57,7 +68,11 @@ export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
         max={12}
         render={(c, m) => (
           <>
-            <Campo rotulo="Classe *" dica="Pode digitar qualquer classe, mesmo de outros livros.">
+            <Campo
+              rotulo="Classe *"
+              dica="Pode digitar qualquer classe, mesmo de outros livros."
+              acao={<BotaoImportar alvo="classe" ativo={painel === 'classe'} aoClicar={() => alternar('classe')} />}
+            >
               <Txt valor={c.nome} aoMudar={(nome) => m({ nome })} max={40} lista="classes-conhecidas" rotulo="Classe" />
             </Campo>
             <Campo rotulo="Subclasse">
@@ -69,6 +84,7 @@ export default function SecaoIdentidade({ ficha: f, mudar }: Props) {
           </>
         )}
       />
+      <ImportarClasse ficha={f} mudar={mudar} aberto={painel === 'classe'} aoFechar={() => setPainel(null)} />
     </div>
   )
 }

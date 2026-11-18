@@ -2,27 +2,50 @@ import { useState } from 'react'
 import { ATRIBUTOS, NOMES_ATRIBUTO, type Ficha } from '../esquema'
 import { aplicarEspacos, type TipoConjurador } from '../novaFicha'
 import { nivelTotal } from '../regras'
-import { Campo, Etiquetas, Lista, Num, Txt } from './campos'
+import { BotaoImportar, Campo, Etiquetas, Lista, Num, Txt } from './campos'
+import ImportarEquipo from './ImportarEquipo'
 
 type Props = { ficha: Ficha; mudar: (f: Ficha) => void }
 
 export default function SecaoMagias({ ficha: f, mudar }: Props) {
   const [tipo, setTipo] = useState<TipoConjurador>('completo')
   const [nivel, setNivel] = useState<number | null>(null)
+  const [painel, setPainel] = useState(false)
+  const [aviso, setAviso] = useState('')
   const conj = f.conjuracao
 
   if (!conj) {
     return (
       <div className="ed-secao">
         <p className="suave">Este personagem não conjura magias.</p>
-        <button type="button" onClick={() => mudar({ ...f, conjuracao: { atributo: 'int', espacos: {}, truques: [], magias: [] } })}>
-          Ele conjura magias: ativar
-        </button>
+        <div className="acoes">
+          <button type="button" onClick={() => mudar({ ...f, conjuracao: { atributo: 'int', espacos: {}, truques: [], magias: [], descricoes: {} } })}>
+            Ele conjura magias: ativar
+          </button>
+          <BotaoImportar alvo="magia" ativo={painel} aoClicar={() => setPainel(!painel)} />
+        </div>
+        <ImportarEquipo ficha={f} mudar={mudar} tipo="magia" aberto={painel} aoFechar={() => setPainel(false)} aviso={aviso} aoAviso={setAviso} />
       </div>
     )
   }
 
-  const alterar = (parcial: Partial<NonNullable<Ficha['conjuracao']>>) => mudar({ ...f, conjuracao: { ...conj, ...parcial } })
+  // Os textos completos das magias são guardados por nome: some o que não tem mais magia/truque correspondente.
+  const alterar = (parcial: Partial<NonNullable<Ficha['conjuracao']>>) => {
+    const novo = { ...conj, ...parcial }
+    const nomes = new Set([...novo.truques, ...novo.magias.map((x) => x.nome)])
+    mudar({ ...f, conjuracao: { ...novo, descricoes: Object.fromEntries(Object.entries(novo.descricoes).filter(([n]) => nomes.has(n))) } })
+  }
+  // Renomear uma magia leva o texto junto.
+  const mudarMagias = (magias: typeof conj.magias) => {
+    const descricoes = { ...conj.descricoes }
+    if (magias.length === conj.magias.length) {
+      magias.forEach((x, i) => {
+        const antigo = conj.magias[i].nome
+        if (antigo !== x.nome && antigo in descricoes && !(x.nome in descricoes)) descricoes[x.nome] = descricoes[antigo]
+      })
+    }
+    alterar({ magias, descricoes })
+  }
   const nivelConj = nivel ?? Math.min(20, nivelTotal(f))
 
   const definirEspaco = (n: number, total: number) => {
@@ -71,13 +94,23 @@ export default function SecaoMagias({ ficha: f, mudar }: Props) {
       </div>
 
       <div style={{ marginTop: 14 }}>
-        <Etiquetas rotulo="Truques" itens={conj.truques} aoMudar={(truques) => alterar({ truques })} placeholder="Nome do truque + Enter" />
+        <Etiquetas
+          rotulo="Truques"
+          itens={conj.truques}
+          aoMudar={(truques) => alterar({ truques })}
+          placeholder="Nome do truque + Enter"
+          acao={<BotaoImportar alvo="magia" ativo={painel} aoClicar={() => setPainel(!painel)} />}
+        />
       </div>
+      <ImportarEquipo ficha={f} mudar={mudar} tipo="magia" aberto={painel} aoFechar={() => setPainel(false)} aviso={aviso} aoAviso={setAviso} />
 
-      <h4 className="ed-subtitulo">Magias</h4>
+      <div className="ed-subtitulo-linha">
+        <h4 className="ed-subtitulo">Magias</h4>
+        <BotaoImportar alvo="magia" ativo={painel} aoClicar={() => setPainel(!painel)} />
+      </div>
       <Lista<NonNullable<Ficha['conjuracao']>['magias'][number]>
         itens={conj.magias}
-        aoMudar={(magias) => alterar({ magias })}
+        aoMudar={mudarMagias}
         novo={() => ({ nome: '', nivel: 1, preparada: false })}
         rotuloAdicionar="Adicionar magia"
         vazio="Nenhuma magia."

@@ -320,14 +320,36 @@ export default function FichaVista({ ficha, aoMudar, aoTestar, aoRolarDano }: Pr
             ))}
             {ficha.conjuracao.truques.length > 0 && (
               <p>
-                <strong>Truques:</strong> {ficha.conjuracao.truques.join(', ')}
+                <strong>Truques:</strong> {ficha.conjuracao.truques.filter((t) => !ficha.conjuracao!.descricoes[t]).join(', ')}
               </p>
             )}
+            {ficha.conjuracao.truques
+              .filter((t) => ficha.conjuracao!.descricoes[t])
+              .map((t) => (
+                <details key={t}>
+                  <summary>
+                    {t} <span className="suave">(truque)</span>
+                  </summary>
+                  <p className="descricao-longa">{ficha.conjuracao!.descricoes[t]}</p>
+                </details>
+              ))}
             <ul className="lista">
               {ficha.conjuracao.magias.map((m, i) => (
                 <li key={i} className={m.preparada ? '' : 'suave'}>
-                  {m.preparada ? '● ' : '○ '}
-                  {m.nome} <span className="suave">({m.nivel}º)</span>
+                  {ficha.conjuracao!.descricoes[m.nome] ? (
+                    <details>
+                      <summary>
+                        {m.preparada ? '● ' : '○ '}
+                        {m.nome} <span className="suave">({m.nivel}º)</span>
+                      </summary>
+                      <p className="descricao-longa">{ficha.conjuracao!.descricoes[m.nome]}</p>
+                    </details>
+                  ) : (
+                    <>
+                      {m.preparada ? '● ' : '○ '}
+                      {m.nome} <span className="suave">({m.nivel}º)</span>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -348,7 +370,7 @@ export default function FichaVista({ ficha, aoMudar, aoTestar, aoRolarDano }: Pr
                     </span>
                   )}
                 </summary>
-                <p>{c.descricao}</p>
+                <p className="descricao-longa">{c.descricao}</p>
                 {c.usosMax !== undefined && (
                   <div className="acoes">
                     <button onClick={() => mudarUso(i, -1)}>Usar</button>
@@ -370,8 +392,20 @@ export default function FichaVista({ ficha, aoMudar, aoTestar, aoRolarDano }: Pr
           <ul className="lista">
             {ficha.inventario.map((item, i) => (
               <li key={i}>
-                {item.equipado ? '⚔ ' : ''}
-                {item.nome} {item.quantidade > 1 && <span className="suave">×{item.quantidade}</span>}
+                {item.descricao ? (
+                  <details>
+                    <summary>
+                      {item.equipado ? '⚔ ' : ''}
+                      {item.nome} {item.quantidade > 1 && <span className="suave">×{item.quantidade}</span>}
+                    </summary>
+                    <p className="descricao-longa">{item.descricao}</p>
+                  </details>
+                ) : (
+                  <>
+                    {item.equipado ? '⚔ ' : ''}
+                    {item.nome} {item.quantidade > 1 && <span className="suave">×{item.quantidade}</span>}
+                  </>
+                )}
               </li>
             ))}
           </ul>

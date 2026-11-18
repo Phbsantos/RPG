@@ -1,5 +1,7 @@
-import type { Ficha } from '../esquema'
-import { Area, Campo, Lista, Num, Txt } from './campos'
+import { useState } from 'react'
+import { LIMITE_DESCRICAO, type Ficha } from '../esquema'
+import { Area, BotaoImportar, Campo, Lista, Num, Txt } from './campos'
+import ImportarEquipo from './ImportarEquipo'
 
 type Props = { ficha: Ficha; mudar: (f: Ficha) => void }
 
@@ -12,8 +14,15 @@ const MOEDAS = [
 ] as const
 
 export default function SecaoInventario({ ficha: f, mudar }: Props) {
+  const [painel, setPainel] = useState(false)
+  const [aviso, setAviso] = useState('')
   return (
     <div className="ed-secao">
+      <div className="ed-subtitulo-linha">
+        <h4 className="ed-subtitulo">Itens</h4>
+        <BotaoImportar alvo="item" ativo={painel} aoClicar={() => setPainel(!painel)} />
+      </div>
+      <ImportarEquipo ficha={f} mudar={mudar} tipo="item" aberto={painel} aoFechar={() => setPainel(false)} aviso={aviso} aoAviso={setAviso} />
       <Lista<Ficha['inventario'][number]>
         itens={f.inventario}
         aoMudar={(inventario) => mudar({ ...f, inventario })}
@@ -36,6 +45,9 @@ export default function SecaoInventario({ ficha: f, mudar }: Props) {
             </label>
             <Campo rotulo="Notas" largo>
               <Txt valor={i.notas ?? ''} aoMudar={(notas) => m({ notas: notas || undefined })} max={300} rotulo="Notas do item" />
+            </Campo>
+            <Campo rotulo="Descrição" largo>
+              <Area valor={i.descricao ?? ''} aoMudar={(descricao) => m({ descricao: descricao || undefined })} max={LIMITE_DESCRICAO} rotulo="Descrição do item" />
             </Campo>
           </>
         )}

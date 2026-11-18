@@ -29,3 +29,7 @@ dist-ssr
 
 # PDFs de fichas (exemplos e fichas pessoais nao devem ir para o repositorio)
 *.pdf
+
+# Arquivos de classe, especie e talento (.md) sao conteudo protegido de livros: ficam so no computador
+/*.md
+!/README.md

@@ -24,9 +24,9 @@ Todo o resto é opcional e tem valor padrão.
 - `proficiencias`: `salvaguardas` (lista de atributos), `pericias` (`{ "atletismo": "proficiente" | "especialista" }`), `ferramentas`, `idiomas`, `armas`, `armaduras`
 - `combate`: `iniciativaBonus`, `deslocamento` (metros), `dadosVida` (`[{ dado, total, usados }]`), `salvaguardasContraMorte`, `condicoes`, `exaustao` (0–6), `inspiracao`
 - `ataques`: `[{ nome, bonus, dano, tipoDano?, notas? }]`
-- `conjuracao`: `atributo`, `espacos` (`{ "1": { total, usados } … "9" }`), `truques`, `magias` (`[{ nome, nivel, preparada, notas? }]`)
+- `conjuracao`: `atributo`, `espacos` (`{ "1": { total, usados } … "9" }`), `truques`, `magias` (`[{ nome, nivel, preparada, notas? }]`), `descricoes` (opcional: texto completo de magias e truques, por nome)
 - `caracteristicas`: `[{ nome, fonte?, descricao, usosMax?, usosAtuais?, recarga?: "curto" | "longo" }]`
-- `talentos`, `inventario`, `moedas` (`pc pp pe po pl`), `notas`
+- `talentos`, `inventario` (`[{ nome, quantidade, peso?, equipado, notas?, descricao? }]`), `moedas` (`pc pp pe po pl`), `notas`
 
 ## Diferenças entre as edições
 

@@ -436,6 +436,128 @@ button.grande {
   gap: 4px;
 }
 
+.ed-campo-linha {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.ed-campo-linha > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.ed-campo-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ed-subtitulo-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ed-subtitulo-linha .ed-subtitulo {
+  margin: 14px 0 8px;
+}
+
+.ed-importar-botao {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.fonte-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.fonte-texto .acoes {
+  align-items: center;
+}
+
+.fonte-texto textarea {
+  min-height: 70px;
+}
+
+.descricao-longa {
+  white-space: pre-line;
+}
+
+.ed-importar {
+  margin-bottom: 14px;
+}
+
+.ed-importar.aberto {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--painel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aviso-importar {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(245, 165, 36, 0.12);
+  border: 1px solid rgba(245, 165, 36, 0.4);
+  color: var(--ouro-2);
+  font-size: 0.85rem;
+}
+
+.ed-importar-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ed-importar-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ed-importar-lista li {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--painel-2);
+  font-size: 0.85rem;
+}
+
+.ed-importar-lista li.existe {
+  opacity: 0.55;
+}
+
+.ed-importar-lista label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.ed-importar-lista .selo {
+  margin-left: 6px;
+}
+
+.ed-importar-lista details p {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--suave);
+}
+
 .ed-subtitulo {
   margin: 18px 0 8px;
   font-size: 0.78rem;

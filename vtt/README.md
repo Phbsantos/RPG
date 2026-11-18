@@ -7,6 +7,10 @@ cada jogador sobe o JSON da própria ficha e joga pelo navegador. Interface em p
 
 - **Salas** por código ou link de convite, com lista de quem está online
 - **Fichas** em JSON ([formato](docs/ESQUEMA-FICHA.md)): PV, espaços de magia, recursos, condições, descansos, upload e download
+- **Editor de ficha** com importação de texto `.md` de classe, espécie/raça, talento, magia e item: o botão *Importar* fica ao lado
+  dos campos Raça, Classe, Talentos, Magias e Itens. O texto pode vir da área de transferência, ser colado numa caixa ou ser um arquivo.
+  Classe: títulos `#### Level N: Nome` e `***Level N: Nome.***` (com as subclasses); raça e talento: `## Nome` e
+  `***Traço.*** texto`. Tudo é lido só no navegador, nada é enviado nem guardado no repositório.
 - **Dados** com fórmulas (`2d6+3`, `2d20kh1`), vantagem/desvantagem, histórico compartilhado, rolagem secreta do mestre e rolagem direto da ficha
 - **Combate**: iniciativa, turnos, rodadas, NPCs, dano/cura/condições (aplicados na ficha do jogador)
 - **Bestiário** do SRD 5.1 (2014) e 5.2 (2024)
